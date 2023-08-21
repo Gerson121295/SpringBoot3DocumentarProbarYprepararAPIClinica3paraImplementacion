@@ -59,7 +59,7 @@ podemos registrar nuevos pacientes, etc.
 # Desarrollo del proyecto
 * Generando proyecto con Spring Initializr. https://start.spring.io/
 
-![StartProyectSpringInitializr.jpg](\img-readme\StartProyectSpringInitializr.jpg)
+![StartProyectSpringInitializr.jpg](src/img-readme/StartProyectSpringInitializr.jpg)
 
 * Dependencias. Qué cosas va usar nuestro proyecto externas a lo que tenemos (las que ya se eligieron como maven, java17 jara).
 - Spring Boot DevTools: Nos da la facilidad de modificar nuestro código y no tener que reiniciar el servidor. Para que veamos los cambios en tiempo real.
@@ -118,19 +118,108 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
 #### Ejecutamos el proyecto:
 - Si no tenemos el modulo del proyecto con Java 17, Debemos actualizar el proyecto a Java 17.
   - Cambiar el proyecto a java 17: Seleccionar proyecto --> Clic en File --> Project Structure --> Clic en Project --> en SDK --> Seleccionar: Java17 --> clic en Apply y Aceptar.
-    ![ChangeProjectToJava17.jpg](\img-readme\projectwithJava17.jpg)
+    ![ChangeProjectToJava17.jpg](src/img-readme/projectwithJava17.jpg)
 - Configurar el proyecto para que pueda usar Devtools: con DevTools no deberíamos reiniciar la aplicación para que funcione.
   - Seleccionar el Proyecto --> Clic en file --> clic en Settings --> desplegar Build, Execution, Deployment --> Seleccionar Compiler --> y dar clic o seleccionar Build project automatically --> clic en Apply
-    ![ConfigDevTools1.jpg](\img-readme\ConfDevTools1.jpg)
+    ![ConfigDevTools1.jpg](src/img-readme/ConfDevTools1.jpg)
   - luego buscar y clicar Advanced Settings: --> dar clic y Seleccionar Allow auto-make to start even if developed aplication is currently running: Clic en Aply y Ok.
-    ![ConfigDevTools2.jpg](\img-readme\ConfDevTools2.jpg)
+    ![ConfigDevTools2.jpg](src/img-readme/ConfDevTools2.jpg)
   - Esto va a habilitar que nuestra aplicación recargue automáticamente apenas guardamos, sin que tengamos que reiniciar el servidor. Solo recargamos el navegador.
 
+## Requests POST
+### Enviando datos:
+- Para las pruebas utilizaremos Insomnia por lo que devemos descargarla: https://insomnia.rest/download
+- Utilizando Insomnia - Este es el cuerpo JSON que va a llegar o debería llegar a mi endpoint de médicos aquí en mi controller.
+```
+{
+  "nombre": "Rodrigo Lopez",
+  "email": "rodrigo.lopez@voll.med",
+  "documento":"123456",
+  "especialidad": "ortopedia",
+  "direccion":{
+  "calle": "calle 1",
+  "distrito": "distrito 1",
+  "ciudad": "lima",
+  "numero": "1",
+  "complemento": "a"
+  }
+  }
+```
+- El body que enviamos normalmente de request post, se llama payload
+- 
+
+
+### Recibiendo datos:
+- JSON (JavaScript Object Notation) es un formato utilizado para representar información, al igual que XML y CSV.
+- Una API necesita recibir y devolver información en algún formato, que representa los recursos que administra. JSON es uno de estos posibles formatos, habiéndose popularizado por su ligereza, sencillez, facilidad de lectura por personas y máquinas, así como por su soporte para diferentes lenguajes de programación.
+- Un ejemplo de representación de información en formato XML sería:
+```
+<producto>
+    <nombre>Mochila</nombre>
+    <precio>89.90</precio>
+    <descripcion>Mochila para notebooks de hasta 17 pulgadas</descripcion>
+</producto>
+```
+
+- La misma información podría representarse en formato JSON de la siguiente manera:
+```
+{
+“nombre” : “Mochila”,
+“precio” : 89.90,
+“descripcion” : “Mochila para notebooks de hasta 17 pulgadas”
+}
+```
+- Observe cómo el formato JSON es mucho más compacto y legible. Precisamente por eso, se ha convertido en el formato universal utilizado en la comunicación de aplicaciones, especialmente en el caso de las API REST.
+- Se pueden encontrar más detalles sobre JSON en el sitio web JSON.org.
+
+##### Tratando con CORS
+Cuando desarrollamos una API y queremos que todos sus recursos estén disponibles para cualquier cliente HTTP, una de las cosas que nos viene a la mente es CORS (Cross-Origin Resource Sharing), en Español, “Intercambio de recursos con diferentes orígenes” Si aún no te ha pasado, no te preocupes, es normal tener errores de CORS al consumir y poner a disposición las APIs.
+
+Pero al fin y al cabo, ¿qué es CORS, qué provoca errores y cómo evitarlos en nuestras APIs con Spring Boot?
+
+##### CORS
+CORS es un mecanismo utilizado para agregar encabezados HTTP que le indican a los navegadores que permitan que una aplicación web se ejecute en un origen y acceda a los recursos desde un origen diferente. Este tipo de acción se denomina cross-origin HTTP request. En la práctica, les dice a los navegadores si se puede acceder o no a un recurso en particular.
+
+Pero, ¿por qué ocurren los errores? ¡Es hora de entender!
+
+- Same-origin policy
+Por defecto, una aplicación Front-end, escrita en JavaScript, solo puede acceder a los recursos ubicados en el mismo origen de la solicitud. Esto sucede debido a la política del mismo origen (same-origin policy), que es un mecanismo de seguridad de los navegadores que restringe la forma en que un documento o script de un origen interactúa con los recursos de otro. Esta política tiene como objetivo detener los ataques maliciosos.
+
+- Dos URL comparten el mismo origen si el protocolo, el puerto (si se especifica) y el host son los mismos. Comparemos posibles variaciones considerando la URL https://cursos.alura.com.br/category/programacao:
+  - URL		
+  https://cursos.alura.com.br/category/front-end	
+  - Resultado: Mismo origen	
+  - Motivo: Solo camino diferente
+
+
+Ahora, la pregunta sigue siendo: ¿qué hacer cuando necesitamos consumir una API con una URL diferente sin tener problemas con CORS? Como, por ejemplo, cuando queremos consumir una API que se ejecuta en el puerto 8000 desde una aplicación React que se ejecuta en el puerto 3000. ¡Compruébalo!
+Al enviar una solicitud a una API de origen diferente, la API debe devolver un header llamado Access-Control-Allow-Origin. Dentro de ella es necesario informar los diferentes orígenes que serán permitidas de consumir la API, en nuestro caso: Access-Control-Allow-Origin: http://localhost:3000.
+Puede permitir el acceso desde cualquier origen utilizando el símbolo * (asterisco): Access-Control-Allow-Origin: *. Pero esta no es una medida recomendada, ya que permite que fuentes desconocidas accedan al servidor, a menos que sea intencional, como en el caso de una API pública. Ahora veamos cómo hacer esto en Spring Boot correctamente.
+##### Habilitación de diferentes orígenes en Spring Boot
+- Para configurar el CORS y permitir que un origen específico consuma la API, simplemente cree una clase de configuración como la siguiente:
+```
+@Configuration
+public class CorsConfiguration implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins("http://localhost:3000")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
+    }
+}
+```
+http://localhost:3000 sería la dirección de la aplicación Front-end y .allowedMethods los métodos que se permitirán ejecutar. Con esto, podrás consumir tu API sin problemas desde una aplicación front-end.
 
 
 
 
 
+
+### DTO Java Record #1:
+
+
+### DTO Java Record #2:
 
 
 
