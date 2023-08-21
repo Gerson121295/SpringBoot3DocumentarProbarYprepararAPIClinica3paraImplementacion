@@ -128,7 +128,7 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
 
 ## Requests POST
 ### Enviando datos:
-- Para las pruebas utilizaremos Insomnia por lo que devemos descargarla: https://insomnia.rest/download
+- Para las pruebas utilizaremos Insomnia por lo que debemos descargarla: https://insomnia.rest/download
 - Utilizando Insomnia - Este es el cuerpo JSON que va a llegar o debería llegar a mi endpoint de médicos aquí en mi controller.
 ```
 {
@@ -146,8 +146,6 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
   }
 ```
 - El body que enviamos normalmente de request post, se llama payload
-- 
-
 
 ### Recibiendo datos:
 - JSON (JavaScript Object Notation) es un formato utilizado para representar información, al igual que XML y CSV.
@@ -211,15 +209,9 @@ public class CorsConfiguration implements WebMvcConfigurer {
 ```
 http://localhost:3000 sería la dirección de la aplicación Front-end y .allowedMethods los métodos que se permitirán ejecutar. Con esto, podrás consumir tu API sin problemas desde una aplicación front-end.
 
+##### DTO Java Record:
+El patrón DTO, Data Transfer Object, que es básicamente usar a nivel de controller un objeto como intermediario para que mapee la información que nos llega desde nuestro cliente hacia nuestro API.
 
-
-
-
-
-### DTO Java Record #1:
-
-
-### DTO Java Record #2:
 
 
 
