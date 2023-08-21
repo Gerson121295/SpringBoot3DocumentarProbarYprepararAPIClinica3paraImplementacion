@@ -59,7 +59,7 @@ podemos registrar nuevos pacientes, etc.
 # Desarrollo del proyecto
 * Generando proyecto con Spring Initializr. https://start.spring.io/
 
-![StartProyectSpringInitializr.jpg](C:\Users\Hp01\OneDrive\Escritorio\Cursos\Alura\JavaBackend-SpringBoot\SpringBoot3DesarrollarAPIRestJavaClinica\api\img-readme\StartProyectSpringInitializr.jpg)
+![StartProyectSpringInitializr.jpg](\img-readme\StartProyectSpringInitializr.jpg)
 
 * Dependencias. Qué cosas va usar nuestro proyecto externas a lo que tenemos (las que ya se eligieron como maven, java17 jara).
 - Spring Boot DevTools: Nos da la facilidad de modificar nuestro código y no tener que reiniciar el servidor. Para que veamos los cambios en tiempo real.
@@ -108,6 +108,26 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
 
 #### Abrimos el proyecto en El Editor de codigo Intellij IDEA
 - Clic en File --> Open --> Elegir api (archivoDescargado generado en Spring Initalizr) -> clic en Trust Project. y listo.
+
+#### Revisamos los archivos del proyecto
+- Archivo pom.xml:
+  - Parent: el spring-boot-starter-parent, Nosotros no tenemos ninguna dependencia que sea, explícitamente Spring Boot como dependencia. ¿Dónde está Spring Boot? Bueno, Spring Boot viene del parent. El parent es como que el padre en el como que el padre de este pom. Por lo tanto al especificar el parent, Spring Boot, esto quiere decir van a heredar todas las características que existen en el pom de Spring Boot. Si hay alguna otra dependecia que quieras que herede a todo el proyecto se puede definir aqui.
+  - Resources: En la parte de recursos o resources tenemos la carpeta static, que es para guardar archivos, JavaScript o .CSS para hojas de estilos en caso que estés creando una aplicación web. La parte de templates es para guardar todo lo que son páginas HTML.
+  - application.properties: Es para almacenar propiedades del archivo. Por ejemplo, si tú quieres en tu código especificar una versión, alguna característica predeterminada nos puede ser útil crear en un archivo properties.
+
+#### Ejecutamos el proyecto:
+- Si no tenemos el modulo del proyecto con Java 17, Debemos actualizar el proyecto a Java 17.
+  - Cambiar el proyecto a java 17: Seleccionar proyecto --> Clic en File --> Project Structure --> Clic en Project --> en SDK --> Seleccionar: Java17 --> clic en Apply y Aceptar.
+    ![ChangeProjectToJava17.jpg](\img-readme\projectwithJava17.jpg)
+- Configurar el proyecto para que pueda usar Devtools: con DevTools no deberíamos reiniciar la aplicación para que funcione.
+  - Seleccionar el Proyecto --> Clic en file --> clic en Settings --> desplegar Build, Execution, Deployment --> Seleccionar Compiler --> y dar clic o seleccionar Build project automatically --> clic en Apply
+    ![ConfigDevTools1.jpg](\img-readme\ConfDevTools1.jpg)
+  - luego buscar y clicar Advanced Settings: --> dar clic y Seleccionar Allow auto-make to start even if developed aplication is currently running: Clic en Aply y Ok.
+    ![ConfigDevTools2.jpg](\img-readme\ConfDevTools2.jpg)
+  - Esto va a habilitar que nuestra aplicación recargue automáticamente apenas guardamos, sin que tengamos que reiniciar el servidor. Solo recargamos el navegador.
+
+
+
 
 
 
