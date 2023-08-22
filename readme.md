@@ -271,9 +271,12 @@ password: root
 - Si elige usar YAML, tenga en cuenta que escribirlo al principio puede ser un poco laborioso debido a sus reglas de tabulación.
 
 #### Entidades JPA
-
-
-
+- Usamos Lombok para reducir codigo, lo que hace es generar automáticamente el código que no tiene sentido escribirlo por ti mismo, por ejemplo:
+  - Si tú queremos generar getters, agregamos arriba de la clase: @Getter    - Y automáticamente una vez que compile, Lombok va a generar automáticamente los getters para todos estos atributos.   
+  - Si Necesito un constructor sin atributos, agregamos arriba de la clase: @NoArgsConstructor para un constructor default. 
+  - Y para un constructor con todos los atributos poner @AllArgsConstructor.
+    ![useLombok.jpg](src/img-readme/useLombok.jpg)
+  
 
 
 
