@@ -229,9 +229,9 @@ El patrón DTO, Data Transfer Object, que es básicamente usar a nivel de contro
 - Ir a la carpeta de resources en el archivo application.properties: Aquí se necesita agregar tres properties para que pueda funcionar el springdata esta son: URL del dataSourse, el nombre del usuario, la contraseña del usuario.
 ```#Database:
 #url+direccion(localhost)+puerto(3306)+vollmed_api(nombre de la BD)
-spring.datasource.url=jdbc:mysql://localhost:3306/vollmed_api
-spring.datasource.username=root  
-spring.datasource.password=admin  
+spring.datasource.url=jdbc:mysql://localhost/vollmed_api
+spring.datasource.username=root
+spring.datasource.password=admin 
 ```
 ##### Crear la Base de datos en MySQL(usando workbeanch)
 - Utilize el comando:
@@ -245,7 +245,7 @@ spring.datasource.password=admin
 
 ###### Archivo de propiedades
 De forma predeterminada, Spring Boot accede a las configuraciones definidas en el archivo application.properties, que utiliza un formato clave=valor:
-```
+```java
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.datasource.url=jdbc:mysql://localhost:3306/clinica
 spring.datasource.username=root
@@ -256,7 +256,7 @@ Cada fila es una configuración única, por lo que necesitamos expresar datos je
 ###### Configuración YAML
 - YAML es otro formato muy utilizado para definir datos de configuración jerárquicos, como se hace en Spring Boot.
 - Tomando el mismo ejemplo de nuestro archivo application.properties, podemos convertirlo a YAML cambiando su nombre a application.yml y modificando su contenido a:
-```
+```java
 spring:
 datasource:
 driver-class-name: com.mysql.cj.jdbc.Driver
@@ -276,10 +276,106 @@ password: root
   - Si Necesito un constructor sin atributos, agregamos arriba de la clase: @NoArgsConstructor para un constructor default. 
   - Y para un constructor con todos los atributos poner @AllArgsConstructor.
     ![useLombok.jpg](src/img-readme/useLombok.jpg)
+
+#### Interfaces repository
+- Medico Repository - Con esta interfaz vamos a ser capaces de hacer todo el proceso de gestión con la BD a nivel del CRUD: crear, guardar objetos, listar, actualizar, etc, pero automáticamente. ¿Por qué?
+  Porque vamos a extender de otra interfaz llamada JpaRepository y está interfaz es propia de Spring data también, pero JpaRepository necesita dos parámetros.
+  - El primer parámetro es el tipo de objeto que yo voy a guardar aquí, por ejemplo, en este caso es Médico, que es la entidad que yo voy a guardar, es el tipo de entidad con el que yo voy a trabajar en este repositorio.
+  - Segundo, necesito el tipo de objeto del id. Entonces en este caso sería un Long.
+```java
+@Repository
+public interface MedicoRepository extends JpaRepository<Medico, Long> { //Recibe la entidad a guardar y su tipo de Id de esa entidad (clase)
+}
+```
+
+#### Para saber más: ¿Qué hay de las clases DAO?
+En algunos proyectos Java, dependiendo de la tecnología elegida, es común encontrar clases que siguen el patrón DAO, usado para aislar el acceso a los datos. Sin embargo, en este curso usaremos otro patrón, conocido como Repositorio.
+
+Pero entonces pueden surgir algunas preguntas: ¿cuál es la diferencia entre los dos enfoques y por qué esta elección?
+
+##### Patrón DAO
+El patrón de diseño DAO, también conocido como Data Access Object, se utiliza para la persistencia de datos, donde su objetivo principal es separar las reglas de negocio de las reglas de acceso a la base de datos. En las clases que siguen este patrón, aislamos todos los códigos que se ocupan de conexiones, comandos SQL y funciones directas a la base de datos, para que dichos códigos no se esparzan a otras partes de la aplicación, algo que puede dificultar el mantenimiento del código y también el intercambio de tecnologías y del mecanismo de persistencia.
+
+###### Implementación
+Supongamos que tenemos una tabla de productos en nuestra base de datos. La implementación del patrón DAO sería la siguiente:
+
+Primero, será necesario crear una clase básica de dominio Producto:
+```java
+public class Producto {
+private Long id;
+private String nombre;
+private BigDecimal precio;
+private String descripcion;
+
+    // constructores, getters y setters
+}
+```
+
+A continuación, necesitaríamos crear la clase ProductoDao, que proporciona operaciones de persistencia para la clase de dominio Producto:
+
+```java
+public class ProductoDao {
+
+    private final EntityManager entityManager;
+
+    public ProductoDao(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public void create(Producto producto) {
+        entityManager.persist(producto);
+    }
+
+    public Producto read(Long id) {
+        return entityManager.find(Producto.class, id);
+    }
+
+    public void update(Producto producto) {
+        entityManger.merge(producto);
+    }
+
+    public void remove(Producto producto) {
+        entityManger.remove(producto);
+}
+
+}
+```
+
+En el ejemplo anterior, se utilizó JPA como tecnología de persistencia de datos de la aplicación.
+
+###### Padrón Repository
+Según el famoso libro Domain-Driven Design de Eric Evans:
+
+- El repositorio es un mecanismo para encapsular el almacenamiento, recuperación y comportamiento de búsqueda, que emula una colección de objetos.
+
+En pocas palabras, un repositorio también maneja datos y oculta consultas similares a DAO. Sin embargo, se encuentra en un nivel más alto, más cerca de la lógica de negocio de una aplicación. Un repositorio está vinculado a la regla de negocio de la aplicación y está asociado con el agregado de sus objetos de negocio, devolviéndolos cuando es necesario.
+
+Pero debemos estar atentos, porque al igual que en el patrón DAO, las reglas de negocio que están involucradas con el procesamiento de información no deben estar presentes en los repositorios. Los repositorios no deben tener la responsabilidad de tomar decisiones, aplicar algoritmos de transformación de datos o brindar servicios directamente a otras capas o módulos de la aplicación. Mapear entidades de dominio y proporcionar funcionalidades de aplicación son responsabilidades muy diferentes.
+
+- Un repositorio se encuentra entre las reglas de negocio y la capa de persistencia:
+
+  - Proporciona una interfaz para las reglas comerciales donde se accede a los objetos como una colección;
+  - Utiliza la capa de persistencia para escribir y recuperar datos necesarios para persistir y recuperar objetos de negocio.
+
+Por lo tanto, incluso es posible utilizar uno o más DAOs en un repositorio.
+
+##### ¿Por qué el padrón repositorio en lugar de DAO usando Spring?
+El patrón de repositorio fomenta un diseño orientado al dominio, lo que proporciona una comprensión más sencilla del dominio y la estructura de datos. Además, al usar el repositorio de Spring, no tenemos que preocuparnos por usar la API de JPA directamente, simplemente creando los métodos, que Spring crea la implementación en tiempo de ejecución, lo que hace que el código sea mucho más simple, pequeño y legible.
+
+#### Migraciones flyway
+- Es un sistema de version de BD, las tablas esta versionadas. Almacenará las tablas de la BD, otra opcion es crear las tablas de la BD por Workbeanch MySQL
+- Clic en carpeta Resource -> clic en New -> clic en Directory -> escribir nombre: DB --> Luego dentro de esta carpeta crear una carpeta llamada migrations: Clic en la Carpeta db -->clic en New -> Clic en Directory --> Escribir nombre: migration
+- Los migration se gestionan con archivos .sql, lo que hace por principio ¿qué es? Ve el archivo sql y lo va a ejecutar sobre la base de datos con la que ya tiene conexión.
+- Crear archivo SQL
+  - Clic derecho sobre la carpeta migration -> Clic en New -> clic en File -> dar nombre al archivo: V1__create-table-medicos.sql    
+    - V1 y los dos guiones bajos es el patrón de Flyway para identificar qué es una migration y él va a decidir si se ejecuta o no.
+    - create-table-medicos la segunda parte del nombre es algo autoexplicativo sobre lo que esta migration está haciendo. En este caso estamos creando una tabla llamada médicos.
+    - Y la tercera parte es la extensión del archivo .sql.
+    - Al ejecutarla, Flyway maneja las versiones en su propia tabla de modo que él identifica que V1 ya fue ejecutado por lo tanto se pueden ver las tablas que se crean en la BD.
+  - Flyway se llama un sistema de versión de base de datos, porque si necesitas aplicar más migrations, por ejemplo, creas un V2, Flyway va a detectar que no la tiene y simplemente va a ejecutarla. En caso de ya la tuviera al ejecutar nuevamente
+  el servidor nos dira que esta al dia y no creará la tabla.
+   
   
-
-
-
 
 
 
