@@ -1,5 +1,6 @@
 package med.voll.api.controller;
 
+import jakarta.validation.Valid;
 import med.voll.api.medico.DatosRegistroMedico;
 import med.voll.api.medico.Medico;
 import med.voll.api.medico.MedicoRepository;
@@ -14,8 +15,10 @@ public class MedicoController {
     @Autowired(required = false) //Para definir la interfaz - No recomendable usar @Autowired ya que tendremos problemas al hacer pruebas unitarias
     private MedicoRepository medicoRepository; //Instanciar nuestra interfaz MedicoRepository
 
+
+    //valid lo que él nos dice es él va a validar que en DatosRegistroMédico todo sea válido.
     @PostMapping //recibe datos (JSON) desde Insomnia.
-    public void registrarMedico(@RequestBody DatosRegistroMedico datosRegistroMedico){ //Para indicar a spring que es un parametro se usa requestBody
+    public void registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico){ //Para indicar a spring que es un parametro se usa requestBody
         medicoRepository.save(new Medico(datosRegistroMedico));
     }
 }

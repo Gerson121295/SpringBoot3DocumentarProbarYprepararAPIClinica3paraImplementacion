@@ -374,9 +374,97 @@ El patrón de repositorio fomenta un diseño orientado al dominio, lo que propor
     - Al ejecutarla, Flyway maneja las versiones en su propia tabla de modo que él identifica que V1 ya fue ejecutado por lo tanto se pueden ver las tablas que se crean en la BD.
   - Flyway se llama un sistema de versión de base de datos, porque si necesitas aplicar más migrations, por ejemplo, creas un V2, Flyway va a detectar que no la tiene y simplemente va a ejecutarla. En caso de ya la tuviera al ejecutar nuevamente
   el servidor nos dira que esta al dia y no creará la tabla.
-   
-  
+ 
+#### Validacion
+- Para validar a nivel de la API. Ir a Spring initializr, buscar y agregar la dependencia Validation.
+```java
+  <dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-validation</artifactId>
+	</dependency>
+```
+- Se recomienda hacer validaciones en la tabla de BD y en los parametros de entrada de la API.
 
+- Tenemos los parámetros aquí, por ejemplo, nombre, ya sabemos que no puede llegar vacío, entonces bean validation a través de anotaciones nos da facilidades, como por ejemplo si le quiero poner aquí @NotNull va a validar que nombre nunca llegue null.
+```java
+public record DatosRegistroMedico(
+        //@NotNull //no lleguen valores nulos
+        @NotBlank //valida que no llegue valores blanco y nulos
+        String nombre,
+        @NotBlank
+        @Email //valida que el formato ingresado sea un email
+        String email,
+        @NotBlank
+        @Pattern(regexp = "\\d(4,6)") //con expresiones regulares acepta, numeros de de 4 a 6 digitos
+        String documento,
+        @NotNull
+        Especialidad especialidad,
+        @NotNull
+        @Valid //valide que la direccion que se recibe contenga toda la informacion. Todo sea válido.
+        DatosDireccion direccion) {
+}
+```
+- En la tabla medicos vemos que el email y el documento, deben de ser unicos se les agrega 'unique'.
+```SQL
+create table medicos(
+    id bigint not null auto_increment,
+    nombre varchar(100) not null,
+    email varchar(100) not null unique,
+    documento varchar(6) not null unique,
+    especialidad varchar(100) not null,
+    calle varchar(100) not null,
+    distrito varchar(100) not null,
+    complemento varchar(100),
+    numero varchar(20),
+    ciudad varchar(100) not null,
+    primary key(id)
+);
+```
+- Tambien la validacion debe darse en el controlador. Sin esta anotación, Spring no activará el proceso de Bean Validation.
+  - @valid lo que él nos dice es él va a validar que en DatosRegistroMédico todo sea válido.
+```java
+  @PostMapping //recibe datos (JSON) desde Insomnia.
+  public void registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico){ //Para indicar a spring que es un parametro se usa requestBody
+  medicoRepository.save(new Medico(datosRegistroMedico));
+  }
+```
+###### validación con Bean Validatión
+- El Bean Validation se compone de varias anotaciones que se deben agregar a los atributos en los que queremos realizar las validaciones. Hemos visto algunas de estas anotaciones, como @NotBlank, que indica que un atributo String no puede ser nulo o vacío.
+- Sin embargo, existen decenas de otras anotaciones que podemos utilizar en nuestro proyecto, para los más diversos tipos de atributos. Puede consultar una lista de las principales anotaciones de Bean Validation en la documentación oficial de la especificación. https://jakarta.ee/specifications/bean-validation/3.0/jakarta-bean-validation-spec-3.0.html#builtinconstraints
+
+#### Nueva migración
+- Una nueva migracion agregar el campo telefono a la tabla medicos.
+  - Crear un archivo llamado: V2__alter-table-medicos-add-telefono.sql sql en la carpeta db.migration dentro de la carpeta resources.
+  - Dentro del archivo V2__alter-table-medicos-add-telefono.sql se agrega el codigo sql para agregar una nueva columna a la table medicos de la BD.
+```sql
+alter table medicos add telefono varchar(20) not null;
+```
+- Agregar el atributo telefono a la entidad Medico y en DatosRegistroMedico, asi tambien se debe agregar en los constructores de las entidades.
+
+- Al ejecutar la app se creará la version 2 en nuestra app y en la BD se vera reflejado.
+  ![versionCreadasFlyway.jpg](src/img-readme/versionCreadasFlyway.jpg)
+
+##### Error en la migración
+- Como se indicó a lo largo de esta clase, es importante detener siempre el proyecto al crear los archivos de migración, para evitar que Flyway los ejecute antes de tiempo, con el código aún incompleto, lo que podría causar problemas.
+- Sin embargo, eventualmente puede ocurrir que nos olvidemos de detener el proyecto y se produzca un error al intentar inicializar la aplicación. En este caso, se mostrará el siguiente error al intentar inicializar la aplicación:
+```
+Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'flywayInitializer' defined in class path resource [org/springframework/boot/autoconfigure/flyway/FlywayAutoConfiguration$FlywayConfiguration.class]: Validate failed: Migrations have failed validation
+```
+- Observe en el mensaje de error que se indica que alguna migración falló, lo que impide que el proyecto se inicie correctamente. Este error también puede ocurrir si el código de migración no es válido y contiene algún fragmento de SQL escrito incorrectamente.
+- Para solucionar este problema será necesario acceder a la base de datos de la aplicación y ejecutar el siguiente comando sql:
+```
+delete from flyway_schema_history where success = 0;
+```
+- El comando anterior se usa para eliminar de la tabla Flyway todas las migraciones cuya ejecución falló. Después de eso, simplemente corrija el código de migración y ejecute el proyecto nuevamente.
+##### Para saber más: Lombok
+- Lombok, como se dijo anteriormente, es una biblioteca de Java especialmente enfocada en la reducción de código y en la productividad en el desarrollo de proyectos en ese lenguaje.
+- Él utiliza la idea de anotaciones (familiar a Spring ¿no?) para generar códigos en el tiempo de compilación. Pero recuerde que no vemos el código generado, y tampoco es posible cambiar lo que se ha generado.
+- Puede ser una buena herramienta aliada a la hora de escribir clases complejas, siempre que el desarrollador tenga conocimiento sobre ella. Para más información vea la documentación de Lombok: https://projectlombok.org/
+##### Para saber más: Anotación @Autowired en Spring
+- Traducido del inglés, la palabra Autowired sería ''un cable automático''. En el contexto del framework Spring, que utiliza como una de sus bases el patrón de diseño “Inyección de Dependencias”, la idea sirve para definir una inyección automática en un determinado componente del proyecto Spring, ese componente puede ser atributos, métodos e incluso constructores.
+- Esta anotación se permite con la ayuda de la anotación @SpringBootApplication, en el archivo de configuración de Spring, disponible cada vez que se crea un proyecto Spring.
+- Al marcar un componente con la anotación @Autowired le estamos diciendo a Spring que el componente es un punto donde se debe inyectar una dependencia, en otras palabras, el componente se inyecta en la clase que lo posee, estableciendo una colaboración entre componentes.
+- Para más información sobre la anotación, echa un vistazo a la documentación oficial: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/Autowired.html
 
 
 

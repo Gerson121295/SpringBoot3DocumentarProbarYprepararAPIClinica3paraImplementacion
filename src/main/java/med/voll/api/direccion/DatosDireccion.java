@@ -6,7 +6,19 @@ Este tipo de patrón que estamos usando se llama patrón DTO, Data Transfer Obje
 controller un objeto como intermediario para que mapee la información que nos llega desde nuestro cliente hacia nuestro API.
  */
 
-public record DatosDireccion(String calle, String distrito, String ciudad, String numero, String complemento) {
+import jakarta.validation.constraints.NotBlank;
+
+public record DatosDireccion(
+        @NotBlank //valida que no llegue valores blanco y nulos
+        String calle,
+        @NotBlank
+        String distrito,
+        @NotBlank
+        String ciudad,
+        @NotBlank
+        String numero,
+        @NotBlank
+        String complemento) {
 }
 
 /*
