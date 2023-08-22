@@ -212,13 +212,65 @@ http://localhost:3000 sería la dirección de la aplicación Front-end y .allowe
 ##### DTO Java Record:
 El patrón DTO, Data Transfer Object, que es básicamente usar a nivel de controller un objeto como intermediario para que mapee la información que nos llega desde nuestro cliente hacia nuestro API.
 
+## 03 - Spring Data JPA(Java Persistence API)
+#### Preparando el ambiente: MySQL
+- Se utilizará MySQL como sistema de gestión de base de datos: Descargarlo de la pagina oficial https://www.mysql.com/
 
+#### Agregando dependencias
+- Utilizando Spring Initializr https://start.spring.io/ : Seleccionar Maven, Spring Boot version: 3.1.2 y buscar las siguientes dependencias, luego clic en Explore(para ver el proyecto que se genera) y Copiar las dependencias y pegarlas en el archivo pom.xml de nuestro proyecto y guardar o clic en el Boton de maven y clic en la rueda de refresh:
+  - Spring Data JPA
+  - MySQL Driver
+  - Flyway Migration (Gestor de migracion de BD, Para mantener la BD como codigo versionado.)
+    ![addDependencySpringInitializr.jpg](src/img-readme/addDependencySpringInitializr.jpg)
+- Otra forma de agrgegar las dependencias es por medio del Maven Repository (https://mvnrepository.com/) el cual el proceso es ir buscar la dependencia y pegarla en el archivo pom.xml del proyecto.
+#### Conexion a la Base de Datos:
+##### configurar un data source: 
 
+- Ir a la carpeta de resources en el archivo application.properties: Aquí se necesita agregar tres properties para que pueda funcionar el springdata esta son: URL del dataSourse, el nombre del usuario, la contraseña del usuario.
+```#Database:
+#url+direccion(localhost)+puerto(3306)+vollmed_api(nombre de la BD)
+spring.datasource.url=jdbc:mysql://localhost:3306/vollmed_api
+spring.datasource.username=root  
+spring.datasource.password=admin  
+```
+##### Crear la Base de datos en MySQL(usando workbeanch)
+- Utilize el comando:
+```
+  create database vollmed_api;
+  use vollmed_api;
+```
+- Luego ejecute la aplicacion de springBoot deberá correr.
+##### Para saber más: ¿Archivo properties o yaml?
+- La configuración de una aplicación Spring Boot se realiza en archivos externos, y podemos usar el archivo de propiedades o el archivo YAML. En este “Para saber más”, abordaremos las principales diferencias entre ellos.
 
+###### Archivo de propiedades
+De forma predeterminada, Spring Boot accede a las configuraciones definidas en el archivo application.properties, que utiliza un formato clave=valor:
+```
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/clinica
+spring.datasource.username=root
+spring.datasource.password=root
+```
+Cada fila es una configuración única, por lo que necesitamos expresar datos jerárquicos usando los mismos prefijos para nuestras claves, es decir, necesitamos repetir los prefijos, en este caso spring y datasource.
 
+###### Configuración YAML
+- YAML es otro formato muy utilizado para definir datos de configuración jerárquicos, como se hace en Spring Boot.
+- Tomando el mismo ejemplo de nuestro archivo application.properties, podemos convertirlo a YAML cambiando su nombre a application.yml y modificando su contenido a:
+```
+spring:
+datasource:
+driver-class-name: com.mysql.cj.jdbc.Driver
+url: jdbc:mysql://localhost:3306/clinica
+username: root
+password: root
+```
+- Con YAML, la configuración se ha vuelto más legible ya que no contiene prefijos repetitivos. Además de la legibilidad y la reducción de repeticiones, el uso de YAML facilita el almacenamiento de variables de configuración del entorno, como lo recomienda 12 Factor App, https://12factor.net/es/ una metodología conocida y utilizada que define 12 mejores prácticas para crear una aplicación moderna, escalable y de sencillo mantenimiento.
 
+###### Pero después de todo, ¿qué formato usar?
+- A pesar de las ventajas que nos aportan los archivos YAML frente al archivo properties, la decisión de elegir uno u otro es una cuestión de gusto personal. Además, no se recomienda tener ambos tipos de archivos en el mismo proyecto al mismo tiempo, ya que esto puede generar problemas inesperados en la aplicación.
+- Si elige usar YAML, tenga en cuenta que escribirlo al principio puede ser un poco laborioso debido a sus reglas de tabulación.
 
-
+#### Entidades JPA
 
 
 
