@@ -1,0 +1,85 @@
+
+
+####   Proceso de creacion de la funcionalidad de registro de pacientes 
+
+- Deberá crear la entidad Paciente:
+
+@Getter
+@EqualsAndHashCode(of = "id")
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity(name = "Paciente")
+@Table(name = "pacientes")
+public class Paciente {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nombre;
+    private String email;
+    private String documentoIdentidad;
+    private String telefono;
+
+    @Embedded
+    private Direccion direccion;
+
+    public Paciente(DatosRegistroPaciente datos) {
+        this.nombre = datos.nombre();
+        this.email = datos.email();
+        this.telefono = datos.telefono();
+        this.documentoIdentidad = datos.documentoIdentidad();
+        this.direccion = new Direccion(datos.direccion());
+    }
+}
+
+
+- A continuación, deberá crear un repositorio:
+
+public interface PacienteRepository extends JpaRepository<Paciente, Long> {}
+
+- Luego deberá cambiar las clases Controller y DTO:
+
+@RestController
+@RequestMapping("pacientes")
+public class PacienteController {
+
+    @Autowired
+    private PacienteRepository repository;
+
+    @PostMapping
+    @Transactional
+    public void registrar(@RequestBody @Valid DatosRegistroPaciente datos) {
+        repository.save(new Paciente(datos));
+    }
+
+
+public record DatosRegistroPaciente(
+        @NotBlank String nombre,
+        @NotBlank @Email String email,
+        @NotBlank String telefono,
+        @NotBlank @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}\\-?\\d{2}") String documentoIdentidad,
+        @NotNull @Valid DatosDireccion direccion
+) {
+}
+
+
+- Y, por último, deberá crear una migración (¡Atención! ¡Recuerde detener el proyecto antes de crear la migración!):
+
+create table pacientes(
+    id bigint not null auto_increment,
+    nombre varchar(100) not null,
+    email varchar(100) not null unique,
+    documentoIdentidad varchar(14) not null unique,
+    telefono varchar(20) not null,
+    urbanización varchar(100) not null,
+    distrito varchar(100) not null,
+    codigoPostal varchar(9) not null,
+    complemento varchar(100),
+    numero varchar(20),
+    provincia varchar(100) not null,
+    ciudad varchar(100) not null,
+
+    primary key(id)
+);
+
+

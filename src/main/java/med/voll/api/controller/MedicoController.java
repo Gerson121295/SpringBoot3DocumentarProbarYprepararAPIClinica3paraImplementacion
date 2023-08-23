@@ -21,4 +21,6 @@ public class MedicoController {
     public void registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico){ //Para indicar a spring que es un parametro se usa requestBody
         medicoRepository.save(new Medico(datosRegistroMedico));
     }
+
+
 }

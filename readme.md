@@ -466,7 +466,93 @@ delete from flyway_schema_history where success = 0;
 - Al marcar un componente con la anotación @Autowired le estamos diciendo a Spring que el componente es un punto donde se debe inyectar una dependencia, en otras palabras, el componente se inyecta en la clase que lo posee, estableciendo una colaboración entre componentes.
 - Para más información sobre la anotación, echa un vistazo a la documentación oficial: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/Autowired.html
 
+####   Proceso de creacion de la funcionalidad de registro de pacientes
 
+- Deberá crear la entidad Paciente:
+```java
+@Getter
+@EqualsAndHashCode(of = "id")
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity(name = "Paciente")
+@Table(name = "pacientes")
+public class Paciente {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String nombre;
+    private String email;
+    private String documentoIdentidad;
+    private String telefono;
+
+    @Embedded
+    private Direccion direccion;
+
+    public Paciente(DatosRegistroPaciente datos) {
+        this.nombre = datos.nombre();
+        this.email = datos.email();
+        this.telefono = datos.telefono();
+        this.documentoIdentidad = datos.documentoIdentidad();
+        this.direccion = new Direccion(datos.direccion());
+    }
+}
+```
+
+- A continuación, deberá crear un repositorio:
+```java
+public interface PacienteRepository extends JpaRepository<Paciente, Long> {}
+```
+- Luego deberá cambiar las clases Controller y DTO:
+```java
+@RestController
+@RequestMapping("pacientes")
+public class PacienteController {
+
+    @Autowired
+    private PacienteRepository repository;
+
+    @PostMapping
+    @Transactional
+    public void registrar(@RequestBody @Valid DatosRegistroPaciente datos) {
+        repository.save(new Paciente(datos));
+    }
+```
+```java
+public record DatosRegistroPaciente(
+        @NotBlank String nombre,
+        @NotBlank @Email String email,
+        @NotBlank String telefono,
+        @NotBlank @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}\\-?\\d{2}") String documentoIdentidad,
+        @NotNull @Valid DatosDireccion direccion
+) {
+}
+```
+
+- Y, por último, deberá crear una migración (¡Atención! ¡Recuerde detener el proyecto antes de crear la migración!):
+```sql
+create table pacientes(
+    id bigint not null auto_increment,
+    nombre varchar(100) not null,
+    email varchar(100) not null unique,
+    documentoIdentidad varchar(14) not null unique,
+    telefono varchar(20) not null,
+    urbanización varchar(100) not null,
+    distrito varchar(100) not null,
+    codigoPostal varchar(9) not null,
+    complemento varchar(100),
+    numero varchar(20),
+    provincia varchar(100) not null,
+    ciudad varchar(100) not null,
+
+    primary key(id)
+);
+```
+### Request GET
+#### Produciendo Datos
+- Consideraciones:
+  - Informacion Requerida del medico: Nombre, Especialidad, Documento y Email.
+  - Reglas de negocio: Ordenado ascendentemente, paginado, maximo 10 registros por paginas.
+   
 
 
 
