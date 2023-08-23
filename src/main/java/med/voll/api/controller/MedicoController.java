@@ -1,10 +1,8 @@
 package med.voll.api.controller;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import med.voll.api.medico.DatosListadoMedico;
-import med.voll.api.medico.DatosRegistroMedico;
-import med.voll.api.medico.Medico;
-import med.voll.api.medico.MedicoRepository;
+import med.voll.api.medico.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +22,27 @@ public class MedicoController {
 
     //valid lo que él nos dice es él va a validar que en DatosRegistroMédico todo sea válido.
     @PostMapping //recibe datos (JSON) desde Insomnia.
-    public void registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico){ //Para indicar a spring que es un parametro se usa requestBody
+    public void registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico){ //Para indicar a spring que es un parametro se usa requestBody y @Valid valida que los datos lleguen correctamente
         medicoRepository.save(new Medico(datosRegistroMedico));
     }
+
+//Probar metodo POST: http://localhost:8080/medicos
+/*    {
+	"nombre": "julia elias",
+	"email": "juli.car@voll.med",
+	"documento":"881114",
+	"telefono":"51656222",
+	"especialidad": "ORTOPEDIA",
+	"direccion":{
+		"calle": "calle 6",
+		"distrito": "distrito 6",
+		"ciudad": "Lima",
+		"numero": "1",
+		"complemento": "e"
+	}
+}
+*/
+
 
 /*
 //Metodo Obtiene un listado de todos los medicos con todos los parametros de la entidad medicos.
@@ -57,7 +73,7 @@ public class MedicoController {
 
 
 // Metodo Con paginacion lista medicos con los parametros Nombre, Especialidad, Documento y Email.
-    //Path a enviar desde Insomnia para Probar Metodo:
+    //Path a enviar desde Insomnia para Probar Metodo GET:
     //Cantidad de registros: http://localhost:8080/medicos?size=2
     //Cantidad de registros y la pagina: http://localhost:8080/medicos?size=2&page=2
    // Paginacion y orden por nombre: http://localhost:8080/medicos?size=4&page=0&sort=nombre    //El atributo a ordenar "nombre" debe ser igual al definido en la tabla de la BD.
@@ -69,7 +85,29 @@ public class MedicoController {
     }
 
 
-    //Metodos para ordenar
+    //Metodos para Actualizar medico: Utilizando JPA puro
+/* Requerimientos:
+- Informacion permitida para actualizacion: Nombre, Documento y Direccion.
+- Reglas de negocio: No permitir actualizar email, especialidad y documento.
+*/
+    @PutMapping
+    @Transactional //Cuando termine el metodo la transaccion se va a liberar por lo que se actualizará el registro
+    public void actualizarMedico(@RequestBody @Valid DatosActualizarMedico datosActualizarMedico){ //Para actualizar se creo un nuevo DTO DatosActualizarMedico ya que tiene informacion especifica para actualizacion Nombre, Documento y Direccion.
+        Medico medico = medicoRepository.getReferenceById(datosActualizarMedico.id()); //Instanciamos la entidad Medico
+        medico.actualizarDatos(datosActualizarMedico);
+    }
+    // Si existe un error en la ejecucion al actualizar medico, Con @Transactional la transacción no va a hacer un commit en la BD. Va a hacer un rollback y no sucedió nada.
+
+//Probar metodo PUT: http://localhost:8080/medicos
+/*
+{
+	"id": 1,
+	"nombre": "Raul Lopez"
+}
+ */
+
+
+
 
 
 }

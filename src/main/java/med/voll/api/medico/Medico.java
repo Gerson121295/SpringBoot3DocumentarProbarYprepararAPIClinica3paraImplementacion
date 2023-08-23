@@ -37,4 +37,18 @@ public class Medico {
         this.especialidad = datosRegistroMedico.especialidad();
         this.direccion =new Direccion(datosRegistroMedico.direccion());
     }
+
+    //Aquí vamos a decir que el nombre del médico me lo iguale a lo que está llegando del DTO,
+    // por ejemplo, entre los datos que yo puedo actualizar están nombre, documento y dirección.
+    public void actualizarDatos(DatosActualizarMedico datosActualizarMedico) {
+        if(datosActualizarMedico.nombre() != null){ // si datosActualizarMedico.nombre es diferente de null
+            this.nombre = datosActualizarMedico.nombre(); // si es diferente de null actualizar dato nombre
+        }
+        if (datosActualizarMedico.documento() != null){
+            this.documento = datosActualizarMedico.documento();
+        }
+        if (datosActualizarMedico.direccion() != null){
+            this.direccion = direccion.actualizarDatos(datosActualizarMedico.direccion());
+        }
+     }
 }
