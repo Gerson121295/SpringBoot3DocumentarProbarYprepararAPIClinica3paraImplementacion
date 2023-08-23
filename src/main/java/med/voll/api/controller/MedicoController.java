@@ -7,6 +7,8 @@ import med.voll.api.medico.MedicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController //Para decirle a spring, que esos es un controller
 @RequestMapping("/medicos") //mapear el path médicos en este controller
@@ -22,5 +24,9 @@ public class MedicoController {
         medicoRepository.save(new Medico(datosRegistroMedico));
     }
 
-
+    //Metodo Obtiene un listado de todos los medicos
+    @GetMapping
+    public List<Medico> listadoMedico(){
+       return medicoRepository.findAll(); //trae toda la lista de medicos. El metodo findAll viene de la extension JpaRepository de la interfaz MedicoRepository
+    }
 }

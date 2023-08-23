@@ -15,3 +15,9 @@ Segundo, necesito el tipo de objeto del id. Entonces en este caso sería un Long
 public interface MedicoRepository extends JpaRepository<Medico, Long> { //Recibe la entidad a guardar y su tipo de Id de esa entidad (clase)
 
 }
+/*
+JpaRepository tiene muchos metodos en los cuales seran heredados por la interfaz MedicoRepository y esta interfaz al ser implementada en el controlador
+tendra acceso a todos los metodos de JpaRepository, metodos como: save, findAll, getById, etc.
+ */
+
+
