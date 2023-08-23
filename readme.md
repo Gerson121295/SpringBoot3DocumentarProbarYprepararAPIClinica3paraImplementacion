@@ -232,6 +232,12 @@ El patrón DTO, Data Transfer Object, que es básicamente usar a nivel de contro
 spring.datasource.url=jdbc:mysql://localhost/vollmed_api
 spring.datasource.username=root
 spring.datasource.password=admin 
+
+#para ver en consola las queries que Spring JPA está ejecutado sobre la App y la base de datos.
+spring.jpa.show-sql=true
+#Para formatear las queries que tenemos. No es recomendable tenerlo en produccion, se ve contaminado los logs
+spring.jpa.properties.hibernate.format_sql=true
+
 ```
 ##### Crear la Base de datos en MySQL(usando workbeanch)
 - Utilize el comando:
@@ -646,6 +652,44 @@ public class Categoria {
 ```
 - Al devolver un objeto de tipo 'Producto' en el Controller, Spring tendría problemas para generar el JSON de este objeto, lo que provocaría una excepción de tipo 'StackOverflowError'. Este problema ocurre porque el objeto producto tiene un atributo de tipo Categoría, que a su vez tiene un atributo de tipo Lista<Producto>, lo que provoca un bucle infinito en el proceso de serialización a JSON.
 - Este problema se puede resolver usando la anotación @JsonIgnore o usando las anotaciones @JsonBackReference y @JsonManagedReference, pero también se puede evitar usando un DTO que represente solo los datos que se deben devolver en el JSON. 
+
+##### Para saber más: parámetros de paginación
+- Los parámetros utilizados para realizar la paginación y el ordenamiento deben llamarse page, size y order. Sin embargo, Spring Boot permite modificar los nombres de dichos parámetros a través de la configuración en el archivo application.properties.
+- Por ejemplo, podríamos traducir al español los nombres de estos parámetros con las siguientes propiedades:
+```java
+spring.data.web.pageable.page-parameter=pagina
+spring.data.web.pageable.size-parameter=tamano
+spring.data.web.sort.sort-parameter=orden
+```
+- Por lo tanto, en solicitudes que usen paginación, debemos usar estos nombres que fueron definidos. Por ejemplo, para listar los médicos de nuestra API trayendo solo 5 registros de la página 2, ordenados por email y en orden descendente, la URL de solicitud debe ser:
+```
+http://localhost:8080/medicos?tamano=5&pagina=1&orden=email,desc
+http://localhost:8080/medicos?size=4&page=0&sort=nombre, desc
+```
+##### Procedimiento para la funcionalidad lista de pacientes.
+- Deberá agregar un nuevo método en el Controller del paciente:
+```java
+@GetMapping
+public Page<DatosListaPaciente> listar(@PageableDefault(page = 0, size = 10, sort = {"nombre"}) Pageable paginacion {
+    return repository.findAll(paginacion).map(DatosListaPaciente::new);
+}
+```
+- También necesita crear el DTO DatosListaPaciente:
+```java
+public record DatosListaPaciente(String nombre, String email, String documentoIdentidad) {
+    public DatosListaPaciente(Paciente paciente) {
+        this(paciente.getNombre(), paciente.getEmail(), paciente.getDocumentoIdentidad());
+    }
+}
+```
+- Usar la anotación @GetMapping para mapear métodos en los Controllers que producen datos;
+- Usar la interfaz Pageable de Spring para realizar consultas con paginación;
+- Controlar la paginación y el ordenamiento de los datos devueltos por la API con los parámetros page, size y sort;
+
+
+
+
+
 
 
 
