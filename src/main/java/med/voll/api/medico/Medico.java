@@ -23,6 +23,8 @@ public class Medico {
     private String email;
     private String telefono;
     private String documento;
+    private Boolean activo; // Para eliminar un registro de forma logico sin eliminarlo de la BD.
+
     @Enumerated(EnumType.STRING)
     private Especialidad especialidad;
 
@@ -30,6 +32,7 @@ public class Medico {
     private Direccion direccion;
 
     public Medico(DatosRegistroMedico datosRegistroMedico) {
+        this.activo = true; //Porque yo llamo al constructor cada que estoy creando este objeto, todo médico que se esté creando por defecto está activo. Cada ves que llamo al constructor estoy creando un medico y este se asigna como true(activo).
         this.nombre = datosRegistroMedico.nombre();
         this.email = datosRegistroMedico.email();
         this.documento = datosRegistroMedico.documento();
@@ -51,4 +54,9 @@ public class Medico {
             this.direccion = direccion.actualizarDatos(datosActualizarMedico.direccion());
         }
      }
+
+     //Para eliminar un medico de forma logica, No elimina el medico de la BD
+    public void desactivarMedico() {
+        this.activo = false;
+    }
 }

@@ -755,23 +755,87 @@ En la práctica, es difícil saber qué método usar, porque no siempre sabremos
 Entonces, lo más común en las aplicaciones es usar el método PUT para las solicitudes de actualización de recursos en una API.
 
 #### Request DELETE
+- Exclusion de Médicos
+  - Reglas de Negocio:
+    - El registro no debe ser borrado de la base de datos.
+    - El listado debe retornar solo médicos activos.
 
+- En las reglas negocio aquí hay algo muy curioso y es que dice: El registro no debe ser borrado de la base de datos. Y el listado debe retornar solo médicos activos. Esto diciendo que el delete que debe hacer es un delete lógico.
+- Es una exclusión lógica y no una exclusión, por así decirlo física, o sea, lo que se quiere es que el médico quede desactivado a nivel de base de datos, pero no se quiere que esa línea sea eliminada de la BD porque obviamente siempre es bueno mantener un histórico, qué médicos han trabajado aquí.
 
+##### Para las funcionalidades de actualización y eliminación de pacientes
+- Deberá agregar nuevos métodos en el Controller del paciente:
+```java
+@PutMapping
+@Transactional
+public void atualizar(@RequestBody @Valid DatosActualizacionPaciente datos) {
+    var paciente = repository.getReferenceById(datos.id());
+    paciente.atualizarInformacion(datos);
+}
 
+@DeleteMapping("/{id}")
+@Transactional
+public void remover(@PathVariable Long id) {
+    var paciente = repository.getReferenceById(id);
+    paciente.inactivar();
+}
+```
+- También deberá crear un atributo y nuevos métodos en la entidad Paciente, además de modificar su constructor:
+```java
+private Boolean activo;
 
+public Paciente(DatosRegistroPaciente datos) {
+    this.activo = true;
+    this.nombre = datos.nombre();
+    this.email = datos.email();
+    this.telefono = datos.telefono();
+    this.documentoIdentidad = datos.documentoIdentidad();
+    this.direccion = new Direccion(datos.direccion());
+}
 
+public void atualizarInformacion(DatosActualizacionPaciente datos) {
+    if (datos.nombre() != null)
+        this.nombre = datos.nombre();
 
+    if (datos.telefono() != null)
+        this.telefono = datos.telefono();
 
+    if (datos.direccion() != null)
+        direccion.atualizarInformacion(datos.direccion());
+}
 
+public void inactivar() {
+    this.activo = false;
+}
+```
+- No sequência, será necessário crear o DTO DatosActualizacionPaciente e modificar o DatosListaPaciente:
+```java
+public record DatosActualizacionMedico(
+    Long id,
+    String nombre,
+    String telefono,
+    @Valid DatosActualizacionDireccion direccion
+) {
+}
+```
+```java
+public record DatosListaPaciente(Long id, String nombre, String email, String documentoIdentidad) {
+    public DatosListaPaciente(Paciente paciente) {
+        this(paciente.getId(), paciente.getNombre(), paciente.getEmail(), paciente.getDocumentoIdentidad());
+    }
+}
+```
+Y finalmente, deberá crear una migración (¡Atencion! ¡Recuerde detener el proyecto antes de crear la migración!):
 
+```sql
+alter table pacientes add column activo tinyint;
+update pacientes set activo = 1;
+alter table pacientes modify activo tinyint not null;
+```
 
-
-
-
-
-
-
-
+- Codigo del Proyecto: 
+  - https://github.com/alura-es-cursos/1952-spring-boot-3-rest-api/tree/clase-5
+  - https://github.com/Gerson121295/SpringBoot3DesarrollarAPIRestJavaClinica
 
 # Estado del proyecto
 <p>
@@ -793,6 +857,7 @@ License: [MIT](License.txt)
 
 
 # Conclusión
+Excelente curso para aprender SpringBoot.
 
 
 

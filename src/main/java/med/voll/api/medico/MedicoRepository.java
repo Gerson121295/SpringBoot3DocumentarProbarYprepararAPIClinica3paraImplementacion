@@ -1,7 +1,11 @@
 package med.voll.api.medico;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /*
 Medico Repository - Con esta interfaz vamos a ser capaces de hacer todo el proceso de gestión con la BD a nivel del CRUD: crear, guardar objetos, listar, actualizar, etc, pero automáticamente. ¿Por qué?
@@ -12,9 +16,12 @@ Segundo, necesito el tipo de objeto del id. Entonces en este caso sería un Long
 */
 
 @Repository
-public interface MedicoRepository extends JpaRepository<Medico, Long> { //Recibe la entidad a guardar y su tipo de Id de esa entidad (clase)
+public interface MedicoRepository extends JpaRepository<Medico, Long> {//Recibe la entidad a guardar y su tipo de Id de esa entidad (clase)
 
+    //Metodo devuelve un listado de medicos donde su campo Activo sea = a true
+    Page<Medico> findByActivoTrue(Pageable paginacion); //Retorna una Pagina de Medico
 }
+
 /*
 JpaRepository tiene muchos metodos en los cuales seran heredados por la interfaz MedicoRepository y esta interfaz al ser implementada en el controlador
 tendra acceso a todos los metodos de JpaRepository, metodos como: save, findAll, getById, etc.

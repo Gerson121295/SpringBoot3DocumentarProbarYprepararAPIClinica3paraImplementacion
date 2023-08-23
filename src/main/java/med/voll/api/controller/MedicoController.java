@@ -81,8 +81,10 @@ public class MedicoController {
     //Para mostrar los datos requeridos se usa un DTO llamado DatosListadoMedico en el cual se define los parametros a mostrar.
     //public Page<DatosListadoMedico> listadoMedico(Pageable paginacion){ //Antes era una lista y ahora debe ser una página elegimos "Page" Page Spring, El parametro Pageable viene del frontend para la paginacion
     public Page<DatosListadoMedico> listadoMedico(@PageableDefault(size = 2) Pageable paginacion){ //Para establecer valores por default a mostrar al ejecutarse la app se utiliza @PageableDefault(size = 2) //muestra 2 registros por default al iniciar la app.
-        return medicoRepository.findAll(paginacion).map(DatosListadoMedico::new);
+        //return medicoRepository.findAll(paginacion).map(DatosListadoMedico::new); //Retorna todos los medicos
+        return medicoRepository.findByActivoTrue(paginacion).map(DatosListadoMedico::new); //Retorna solo a los medicos que en su campo activo sea = a true.
     }
+
 
 
     //Metodos para Actualizar medico: Utilizando JPA puro
@@ -107,6 +109,34 @@ public class MedicoController {
  */
 
 
+    //Metodo Delete en BD - Borrar completamente de la BD a un medico enviando su id. Por medio de PathVariable que es una variable que va en la URL
+    // Probar metodo DELETE: http://localhost:8080/medicos/3
+
+ /* @DeleteMapping("/{id}")// /3  o  /{id} - va una variable id la cual se recibe para eliminar el medico
+    @Transactional
+    public void eliminarMedico(@PathVariable Long id){ //@PathVariable especifica que la variable viene del Path es tipo Long id
+        Medico medico = medicoRepository.getReferenceById(id);
+        medicoRepository.delete(medico); //mandamos el médico como entidad que queremos borrar.
+    }
+*/
+
+/* Exclusion de Médicos
+  - Reglas de Negocio:
+  - El registro no debe ser borrado de la base de datos.
+  - El listado debe retornar solo médicos activos.
+
+  Para cumplir esta regla de negocio:
+  - Agregar un campo más a la entidad médico, agregar un flag, una bandera, característica a estos médicos que digan que están activos.
+*/
+
+    //Metodo Delete logico - Muestra los medicos donde su campo activo sea = 1, los que tengan el campo activo = 0 no serán mostrados.
+    //Probar metodo Delete: DEL ->  http://localhost:8080/medicos/7
+    @DeleteMapping("/{id}")// /3  o  /{id} - va una variable id la cual se recibe para eliminar el medico
+    @Transactional
+    public void eliminarMedico(@PathVariable Long id){ //@PathVariable especifica que la variable viene del Path es tipo Long id
+        Medico medico = medicoRepository.getReferenceById(id);
+        medico.desactivarMedico();
+    }
 
 
 
