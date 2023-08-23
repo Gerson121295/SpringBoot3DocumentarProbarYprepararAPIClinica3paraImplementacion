@@ -6,6 +6,8 @@ import med.voll.api.medico.DatosRegistroMedico;
 import med.voll.api.medico.Medico;
 import med.voll.api.medico.MedicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,28 +28,42 @@ public class MedicoController {
     }
 
 /*
-    //Metodo Obtiene un listado de todos los medicos con todos los parametros de la entidad medicos.
+//Metodo Obtiene un listado de todos los medicos con todos los parametros de la entidad medicos.
+ // Path a enviar para probar metodo: http://localhost:8080/medicos
+
     @GetMapping
     public List<Medico> listadoMedico(){
        return medicoRepository.findAll(); //trae toda la lista de medicos. El metodo findAll viene de la extension JpaRepository de la interfaz MedicoRepository
     }
 /*
 
-    /*
+/*
     - Consideraciones:
   - Informacion Requerida del medico: Nombre, Especialidad, Documento y Email.
   - Reglas de negocio: Ordenado ascendentemente, paginado, maximo 10 registros por paginas.
-     */
+*/
 
+/*
     // Metodo lista medicos con los parametros Nombre, Especialidad, Documento y Email.
     @GetMapping
     //Para mostrar los datos requeridos se usa un DTO llamado DatosListadoMedico en el cual se define los parametros a mostrar.
     public List<DatosListadoMedico> listadoMedico(){
         return medicoRepository.findAll().stream().map(DatosListadoMedico::new).toList();
     }
-
+*/
     //medicoRepository.findAll retorna un listado de médico como entidad, no de DatosListadoMedico. Para esto se hace uso del API Stream de Java, entonces aquí se le da stream.map y se le dice que
     //use los datos de listadoMedicos y que me cree un nuevo DatosListadoMedico con cada médico que traiga de la BD. Y se agrega un toList para que retorne en un objeto del tipo de lista.
+
+
+// Metodo Con paginacion lista medicos con los parametros Nombre, Especialidad, Documento y Email.
+    //Path a enviar desde Insomnia para Probar Metodo:
+    //Cantidad de registros: http://localhost:8080/medicos?size=2
+    //Cantidad de registros y la pagina: http://localhost:8080/medicos?size=2&page=2
+    @GetMapping
+    //Para mostrar los datos requeridos se usa un DTO llamado DatosListadoMedico en el cual se define los parametros a mostrar.
+    public Page<DatosListadoMedico> listadoMedico(Pageable paginacion){ //Antes era una lista y ahora debe ser una página elegimos "Page" Page Spring, El parametro Pageable viene del frontend para la paginacion
+        return medicoRepository.findAll(paginacion).map(DatosListadoMedico::new);
+    }
 
 
 
