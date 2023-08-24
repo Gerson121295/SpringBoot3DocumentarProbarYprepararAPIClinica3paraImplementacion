@@ -85,7 +85,6 @@ Seleccione la sección ‘Java Compiler’ y desmarque la opción de la parte �
 Después es posible cambiar la versión de Java en la parte ‘Compiler compliance level’.
 Seleccione la sección ‘Java Compiler'y desmarque la opción de la parte ‘JDK Compliance’.- Después es posible cambiar la versión de Java en la parte ‘Compiler compliance level’.
 
-
 ## Que es Spring y Spring Boot
 
 Spring y Spring Boot no son lo mismo con diferentes nombres.
@@ -100,12 +99,6 @@ Precisamente para solventar tales dificultades, a mediados de 2014 se creó un n
 
 El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Java, ya que hizo más simple y ágil esta tarea, facilitando mucho la vida de las personas que utilizan el lenguaje Java para desarrollar sus aplicaciones.
 
-- La versión 3 de Spring Boot se lanzó en noviembre de 2022 y trae algunas características nuevas en comparación con la versión anterior. Entre las principales novedades se encuentran:
-  - Compatibilidad con Java 17
-  - Migración de especificaciones Java EE a Jakarta EE
-  - Compatibilidad con imágenes nativas
-  - Puede ver la lista completa de las novedades de Spring Boot versión 3 en el sitio web: Spring Boot 3.0 Release Notes
-
 #### Abrimos el proyecto en El Editor de codigo Intellij IDEA
 - Clic en File --> Open --> Elegir api (archivoDescargado generado en Spring Initalizr) -> clic en Trust Project. y listo.
 
@@ -118,12 +111,9 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
 #### Ejecutamos el proyecto:
 - Si no tenemos el modulo del proyecto con Java 17, Debemos actualizar el proyecto a Java 17.
   - Cambiar el proyecto a java 17: Seleccionar proyecto --> Clic en File --> Project Structure --> Clic en Project --> en SDK --> Seleccionar: Java17 --> clic en Apply y Aceptar.
-    ![ChangeProjectToJava17.jpg](src/img-readme/projectwithJava17.jpg)
-- Configurar el proyecto para que pueda usar Devtools: con DevTools no deberíamos reiniciar la aplicación para que funcione.
-  - Seleccionar el Proyecto --> Clic en file --> clic en Settings --> desplegar Build, Execution, Deployment --> Seleccionar Compiler --> y dar clic o seleccionar Build project automatically --> clic en Apply
-    ![ConfigDevTools1.jpg](src/img-readme/ConfDevTools1.jpg)
+- Configurar el proyecto para que pueda usar Devtools: con DevTools no deberíamos reiniciar la aplicación para que funcione. Al detectar cambios el servidor se actualiza, no tenemos que darle run otra vez.
+  - Seleccionar el Proyecto --> Clic en file --> clic en Settings --> desplegar Build, Execution, Deployment --> Seleccionar Compiler --> y dar clic o seleccionar Build project automatically --> clic en Apply 
   - luego buscar y clicar Advanced Settings: --> dar clic y Seleccionar Allow auto-make to start even if developed aplication is currently running: Clic en Aply y Ok.
-    ![ConfigDevTools2.jpg](src/img-readme/ConfDevTools2.jpg)
   - Esto va a habilitar que nuestra aplicación recargue automáticamente apenas guardamos, sin que tengamos que reiniciar el servidor. Solo recargamos el navegador.
 
 ## Requests POST
@@ -155,7 +145,6 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
 <producto>
     <nombre>Mochila</nombre>
     <precio>89.90</precio>
-    <descripcion>Mochila para notebooks de hasta 17 pulgadas</descripcion>
 </producto>
 ```
 
@@ -163,8 +152,7 @@ El lanzamiento de Spring Boot fue un hito para el desarrollo de aplicaciones Jav
 ```
 {
 “nombre” : “Mochila”,
-“precio” : 89.90,
-“descripcion” : “Mochila para notebooks de hasta 17 pulgadas”
+“precio” : 89.90
 }
 ```
 - Observe cómo el formato JSON es mucho más compacto y legible. Precisamente por eso, se ha convertido en el formato universal utilizado en la comunicación de aplicaciones, especialmente en el caso de las API REST.
@@ -316,7 +304,6 @@ private String descripcion;
     // constructores, getters y setters
 }
 ```
-
 A continuación, necesitaríamos crear la clase ProductoDao, que proporciona operaciones de persistencia para la clase de dominio Producto:
 
 ```java
@@ -353,14 +340,11 @@ En el ejemplo anterior, se utilizó JPA como tecnología de persistencia de dato
 Según el famoso libro Domain-Driven Design de Eric Evans:
 
 - El repositorio es un mecanismo para encapsular el almacenamiento, recuperación y comportamiento de búsqueda, que emula una colección de objetos.
-
 En pocas palabras, un repositorio también maneja datos y oculta consultas similares a DAO. Sin embargo, se encuentra en un nivel más alto, más cerca de la lógica de negocio de una aplicación. Un repositorio está vinculado a la regla de negocio de la aplicación y está asociado con el agregado de sus objetos de negocio, devolviéndolos cuando es necesario.
 
 Pero debemos estar atentos, porque al igual que en el patrón DAO, las reglas de negocio que están involucradas con el procesamiento de información no deben estar presentes en los repositorios. Los repositorios no deben tener la responsabilidad de tomar decisiones, aplicar algoritmos de transformación de datos o brindar servicios directamente a otras capas o módulos de la aplicación. Mapear entidades de dominio y proporcionar funcionalidades de aplicación son responsabilidades muy diferentes.
-
 - Un repositorio se encuentra entre las reglas de negocio y la capa de persistencia:
-
-  - Proporciona una interfaz para las reglas comerciales donde se accede a los objetos como una colección;
+ - Proporciona una interfaz para las reglas comerciales donde se accede a los objetos como una colección;
   - Utiliza la capa de persistencia para escribir y recuperar datos necesarios para persistir y recuperar objetos de negocio.
 
 Por lo tanto, incluso es posible utilizar uno o más DAOs en un repositorio.
@@ -447,8 +431,6 @@ alter table medicos add telefono varchar(20) not null;
 ```
 - Agregar el atributo telefono a la entidad Medico y en DatosRegistroMedico, asi tambien se debe agregar en los constructores de las entidades.
 
-- Al ejecutar la app se creará la version 2 en nuestra app y en la BD se vera reflejado.
-  ![versionCreadasFlyway.jpg](src/img-readme/versionCreadasFlyway.jpg)
 
 ##### Error en la migración
 - Como se indicó a lo largo de esta clase, es importante detener siempre el proyecto al crear los archivos de migración, para evitar que Flyway los ejecute antes de tiempo, con el código aún incompleto, lo que podría causar problemas.
@@ -472,93 +454,11 @@ delete from flyway_schema_history where success = 0;
 - Al marcar un componente con la anotación @Autowired le estamos diciendo a Spring que el componente es un punto donde se debe inyectar una dependencia, en otras palabras, el componente se inyecta en la clase que lo posee, estableciendo una colaboración entre componentes.
 - Para más información sobre la anotación, echa un vistazo a la documentación oficial: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/Autowired.html
 
-####   Proceso de creacion de la funcionalidad de registro de pacientes
-
-- Deberá crear la entidad Paciente:
-```java
-@Getter
-@EqualsAndHashCode(of = "id")
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity(name = "Paciente")
-@Table(name = "pacientes")
-public class Paciente {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String nombre;
-    private String email;
-    private String documentoIdentidad;
-    private String telefono;
-
-    @Embedded
-    private Direccion direccion;
-
-    public Paciente(DatosRegistroPaciente datos) {
-        this.nombre = datos.nombre();
-        this.email = datos.email();
-        this.telefono = datos.telefono();
-        this.documentoIdentidad = datos.documentoIdentidad();
-        this.direccion = new Direccion(datos.direccion());
-    }
-}
-```
-
-- A continuación, deberá crear un repositorio:
-```java
-public interface PacienteRepository extends JpaRepository<Paciente, Long> {}
-```
-- Luego deberá cambiar las clases Controller y DTO:
-```java
-@RestController
-@RequestMapping("pacientes")
-public class PacienteController {
-
-    @Autowired
-    private PacienteRepository repository;
-
-    @PostMapping
-    @Transactional
-    public void registrar(@RequestBody @Valid DatosRegistroPaciente datos) {
-        repository.save(new Paciente(datos));
-    }
-```
-```java
-public record DatosRegistroPaciente(
-        @NotBlank String nombre,
-        @NotBlank @Email String email,
-        @NotBlank String telefono,
-        @NotBlank @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}\\-?\\d{2}") String documentoIdentidad,
-        @NotNull @Valid DatosDireccion direccion
-) {
-}
-```
-
-- Y, por último, deberá crear una migración (¡Atención! ¡Recuerde detener el proyecto antes de crear la migración!):
-```sql
-create table pacientes(
-    id bigint not null auto_increment,
-    nombre varchar(100) not null,
-    email varchar(100) not null unique,
-    documentoIdentidad varchar(14) not null unique,
-    telefono varchar(20) not null,
-    urbanización varchar(100) not null,
-    distrito varchar(100) not null,
-    codigoPostal varchar(9) not null,
-    complemento varchar(100),
-    numero varchar(20),
-    provincia varchar(100) not null,
-    ciudad varchar(100) not null,
-
-    primary key(id)
-);
-```
 ### Request GET
 #### Produciendo Datos
 - Consideraciones:
   - Informacion Requerida del medico: Nombre, Especialidad, Documento y Email.
   - Reglas de negocio: Ordenado ascendentemente, paginado, maximo 10 registros por paginas.
-
 
 #### Para saber más: ¿DTO o entidades?
 
@@ -666,22 +566,7 @@ spring.data.web.sort.sort-parameter=orden
 http://localhost:8080/medicos?tamano=5&pagina=1&orden=email,desc
 http://localhost:8080/medicos?size=4&page=0&sort=nombre, desc
 ```
-##### Procedimiento para la funcionalidad lista de pacientes.
-- Deberá agregar un nuevo método en el Controller del paciente:
-```java
-@GetMapping
-public Page<DatosListaPaciente> listar(@PageableDefault(page = 0, size = 10, sort = {"nombre"}) Pageable paginacion {
-    return repository.findAll(paginacion).map(DatosListaPaciente::new);
-}
-```
-- También necesita crear el DTO DatosListaPaciente:
-```java
-public record DatosListaPaciente(String nombre, String email, String documentoIdentidad) {
-    public DatosListaPaciente(Paciente paciente) {
-        this(paciente.getNombre(), paciente.getEmail(), paciente.getDocumentoIdentidad());
-    }
-}
-```
+
 - Usar la anotación @GetMapping para mapear métodos en los Controllers que producen datos;
 - Usar la interfaz Pageable de Spring para realizar consultas con paginación;
 - Controlar la paginación y el ordenamiento de los datos devueltos por la API con los parámetros page, size y sort;
@@ -763,79 +648,38 @@ Entonces, lo más común en las aplicaciones es usar el método PUT para las sol
 - En las reglas negocio aquí hay algo muy curioso y es que dice: El registro no debe ser borrado de la base de datos. Y el listado debe retornar solo médicos activos. Esto diciendo que el delete que debe hacer es un delete lógico.
 - Es una exclusión lógica y no una exclusión, por así decirlo física, o sea, lo que se quiere es que el médico quede desactivado a nivel de base de datos, pero no se quiere que esa línea sea eliminada de la BD porque obviamente siempre es bueno mantener un histórico, qué médicos han trabajado aquí.
 
-##### Para las funcionalidades de actualización y eliminación de pacientes
-- Deberá agregar nuevos métodos en el Controller del paciente:
-```java
-@PutMapping
-@Transactional
-public void atualizar(@RequestBody @Valid DatosActualizacionPaciente datos) {
-    var paciente = repository.getReferenceById(datos.id());
-    paciente.atualizarInformacion(datos);
-}
 
-@DeleteMapping("/{id}")
-@Transactional
-public void remover(@PathVariable Long id) {
-    var paciente = repository.getReferenceById(id);
-    paciente.inactivar();
-}
-```
-- También deberá crear un atributo y nuevos métodos en la entidad Paciente, además de modificar su constructor:
-```java
-private Boolean activo;
+# Curso de Spring Boot 3: aplique las mejores prácticas y proteja una API Rest
+- Aprenda buenas practicas en diseño de API
+- Aprenda fundamentos basicos de autenticación y autorización
+- Aprenda a retornar codigos de error HTTP
+- Aprenda fundamentos de Spring Security
 
-public Paciente(DatosRegistroPaciente datos) {
-    this.activo = true;
-    this.nombre = datos.nombre();
-    this.email = datos.email();
-    this.telefono = datos.telefono();
-    this.documentoIdentidad = datos.documentoIdentidad();
-    this.direccion = new Direccion(datos.direccion());
-}
+## 01 - Aprenda buenas practicas en diseño de API
 
-public void atualizarInformacion(DatosActualizacionPaciente datos) {
-    if (datos.nombre() != null)
-        this.nombre = datos.nombre();
 
-    if (datos.telefono() != null)
-        this.telefono = datos.telefono();
 
-    if (datos.direccion() != null)
-        direccion.atualizarInformacion(datos.direccion());
-}
 
-public void inactivar() {
-    this.activo = false;
-}
-```
-- No sequência, será necessário crear o DTO DatosActualizacionPaciente e modificar o DatosListaPaciente:
-```java
-public record DatosActualizacionMedico(
-    Long id,
-    String nombre,
-    String telefono,
-    @Valid DatosActualizacionDireccion direccion
-) {
-}
-```
-```java
-public record DatosListaPaciente(Long id, String nombre, String email, String documentoIdentidad) {
-    public DatosListaPaciente(Paciente paciente) {
-        this(paciente.getId(), paciente.getNombre(), paciente.getEmail(), paciente.getDocumentoIdentidad());
-    }
-}
-```
-Y finalmente, deberá crear una migración (¡Atencion! ¡Recuerde detener el proyecto antes de crear la migración!):
 
-```sql
-alter table pacientes add column activo tinyint;
-update pacientes set activo = 1;
-alter table pacientes modify activo tinyint not null;
-```
 
-- Codigo del Proyecto: 
+
+
+
+
+
+
+
+
+
+
+
+- Codigo del Proyecto Anterior: 
   - https://github.com/alura-es-cursos/1952-spring-boot-3-rest-api/tree/clase-5
+  - https://github.com/alura-cursos/2770-spring-boot/tree/projeto_inicial
   - https://github.com/Gerson121295/SpringBoot3DesarrollarAPIRestJavaClinica
+- Codigo del Proyecto Actual:
+- Presentaciones: https://drive.google.com/drive/folders/1eNnXuuPuxIi70toLvNzjDG2Joet70Kt7
+- 
 
 # Estado del proyecto
 <p>
