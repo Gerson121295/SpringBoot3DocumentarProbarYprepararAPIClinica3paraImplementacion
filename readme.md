@@ -186,6 +186,79 @@ public ResponseEntity detallar(@PathVariable Long id) {
 } 
 ```
 ## 02 - Tratando Errores
+##### Spring boot Properties
+- Sitio web para configuraciones de Spring boot. Buscar en google el sitio Spring boot properties luego server Properties.
+  - #Spring boot Properties --> Server Properties -> server.error.include-stacktrace
+
+- server.error.include-stacktrace = never, Se agrega en el archivo application.properties,  para evitar que el stacktracer de la excepción sea devuelto en el cuerpo de la respuesta, para evitar mostrar el StackTrages en los logs ya que representa problemas de seguridad al mostrar demasiada informacion.
+- El archivo application.properties sirve para hacer configuraciones en el proyecto.
+
+### personalización de mensajes de error
+- Bean Validation tiene un mensaje de error para cada una de sus anotaciones. Por ejemplo, cuando la validación falla en algún atributo anotado con @NotBlank, el mensaje de error será: must not be blank.
+- Estos mensajes de error no se definieron en la aplicación, ya que son mensajes de error estándar de Bean Validation. Sin embargo, si lo desea, puede personalizar dichos mensajes.
+- Una de las formas de personalizar los mensajes de error es agregar el atributo del mensaje a las anotaciones de validación:
+
+```java
+public record DatosCadastroMedico(
+    @NotBlank(message = "Nombre es obligatorio")
+    String nombre,
+
+    @NotBlank(message = "Email es obligatorio")
+    @Email(message = "Formato de email es inválido")
+    String email,
+
+    @NotBlank(message = "Teléfono es obligatorio")
+    String telefono,
+
+    @NotBlank(message = "CRM es obligatorio")
+    @Pattern(regexp = "\\d{4,6}", message = "Formato do CRM es inválido")
+    String crm,
+
+    @NotNull(message = "Especialidad es obligatorio")
+    Especialidad especialidad,
+
+    @NotNull(message = "Datos de dirección son obligatorios")
+    @Valid DatosDireccion direccion) {}
+```
+
+- Otra forma es aislar los mensajes en un archivo de propiedades, que debe tener el nombre ValidationMessages.properties y estar creado en el directorio src/main/resources:
+```properties
+nombre.obligatorio=El nombre es obligatorio
+email.obligatorio=Correo electrónico requerido
+email.invalido=El formato del correo electrónico no es válido
+phone.obligatorio=Teléfono requerido
+crm.obligatorio=CRM es obligatorio
+crm.invalido=El formato CRM no es válido
+especialidad.obligatorio=La especialidad es obligatoria
+address.obligatorio=Los datos de dirección son obligatorios
+```
+- Y, en las anotaciones, indicar la clave de las propiedades por el propio atributo message, delimitando con los caracteres { e }:
+```java
+public record DatosRegistroMedico(
+    @NotBlank(message = "{nombre.obligatorio}")
+    String nombre,
+
+    @NotBlank(message = "{email.obligatorio}")
+    @Email(message = "{email.invalido}")
+    String email,
+
+    @NotBlank(message = "{telefono.obligatorio}")
+    String telefono,
+
+    @NotBlank(message = "{crm.obligatorio}")
+    @Pattern(regexp = "\\d{4,6}", message = "{crm.invalido}")
+    String crm,
+
+    @NotNull(message = "{especialidad.obligatorio}")
+    Especialidad especialidad,
+
+    @NotNull(message = "{direccion.obligatorio}")
+    @Valid DatosDireccion direccion) {}
+```
+
+
+
+
 
 
 

@@ -2,8 +2,8 @@ package med.voll.api.controller;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import med.voll.api.direccion.DatosDireccion;
-import med.voll.api.medico.*;
+import med.voll.api.domain.direccion.DatosDireccion;
+import med.voll.api.domain.medico.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,7 @@ public class MedicoController{
    //Buenas practicas para Metodo Post: Return 201 - Created - Registro Creado, Return URL donde encontrar al medico.
     @PostMapping //recibe datos (JSON) desde Insomnia.
     public ResponseEntity<DatosRespuestaMedico> registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico, //Para indicar a spring que es un parametro se usa requestBody y @Valid valida que los datos en DatosRegistroMédico todo sea válido, lleguen correctamente
-                                        UriComponentsBuilder uriComponentsBuilder){ //genera la URL URI a retornar donde esta el registro creado
+                                                                UriComponentsBuilder uriComponentsBuilder){ //genera la URL URI a retornar donde esta el registro creado
         Medico medico = medicoRepository.save(new Medico(datosRegistroMedico));
         DatosRespuestaMedico datosRespuestaMedico = new DatosRespuestaMedico(
                 medico.getId(), medico.getNombre(), medico.getEmail(),
@@ -172,7 +172,7 @@ public class MedicoController{
                                 medico.getDireccion().getCiudad(), medico.getDireccion().getNumero(),
                                 medico.getDireccion().getComplemento()));
         return ResponseEntity.ok(datosMedico); //agregar response al hacer la consulta exitosa retorna un 200 Content y los datos del medico.
-    }
+    }//ResponseEntity es un wrapper para encapsular la respuesta que le vamos a dar a nuestro servidor
 
 
 }
