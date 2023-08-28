@@ -329,11 +329,41 @@ Ustedes saben que yo necesito una visa. La visa es la autorización que yo neces
 - Sin esta anotación de método, el objeto SecurityFilterChain no estará expuesto como un bean para Spring.
 
 
+## 04 - JSON Web Token
+-  JSON Web Token es un estándar para definición de tokens en el cual, por ejemplo el token generado es generado con un algoritmo de encriptación.
+   Tenemos varios algoritmos irritación, por ejemplo aquí vemos que estaba usando un HS256, 256 bits, del tipo JWT.
+- Pagina oficial de JWT: https://jwt.io/
+- Entrar a la pagina de JWT --> luego a la opcion de See JWT LIBRARIES --> Buscar el de JAVA
+- Librerias para Java https://jwt.io/libraries?language=Java  
+- Elegir java usando Auth0 y ver Documentacion en el Repositorio de Github: https://github.com/auth0/java-jwt
+- Ya obtenido nuestro token podemos validar que el token recibido sea igual que la contraseña. Utilizando el sitio de jwt.io  ahi se pega el token generado.
+  ![validarToken.jpg](src/img-readme/validarToken.jpg)
 
+- Si en todo tu API y el estándar es consumir DTO y devolver DTO, eso debe aplicar para todos los métodos que estás usando. Es para mantener tu código limpio y mucho más entendible también para tu aplicación cliente a veces consumir el string directamente no es tan fácil que digamos.
 
+## Otra información sobre el Token
+- Además del Issuer, Subject y fecha de expiración, podemos incluir otra información en el token JWT, según las necesidades de la aplicación. Por ejemplo, podemos incluir el id del usuario en el token, simplemente usando el método withClaim:
 
+```java
+return JWT.create()
+    .withIssuer("API Voll.med")
+    .withSubject(usuario.getLogin())
 
+    .withClaim("id", usuario.getId())
 
+    .withExpiresAt(fechaExpiracion())
+    .sign(algoritmo);
+```
+- El método withClaim recibe dos parámetros, el primero es un String que identifica el nombre del claim (propiedad almacenada en el token), y el segundo la información a almacenar.
+
+## Inyección de propiedad
+- podemos inyectar una propiedad declarada en el archivo application.properties en una clase administrada por Spring, usando la anotación @Value.
+- Suponiendo que el archivo application.properties tiene declarada la siguiente propiedad:
+ ```properties
+app.test=true
+```
+-  la forma CORRECTA de inyectarlo en un atributo de una clase administrada por Spring es utilizando:
+- Esta es la forma correcta de usar la anotación @Value:  @Value("${app.test}")
 
 
 
