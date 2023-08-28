@@ -1,4 +1,4 @@
-package med.voll.api.infra;
+package med.voll.api.infra.errores;
 
 
 //EL fin de esta clase es: Tratar los errores globalmente a nivel del controller, de mi proyecto, no a nivel de cada método en específico del controlador.

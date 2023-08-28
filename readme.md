@@ -33,6 +33,9 @@ y hay interacciones interesantes entre estos, por ejemplo, un paciente puede ten
 Este tipo de relaciones y mapeamientos lo vamos a ver con Hybernate, por ejemplo. Podemos listar las historias clínicas, podemos listar los pacientes, 
 podemos registrar nuevos pacientes, etc.
 
+![clinicaVoll.jpg](src/img-readme/clinicaVoll.jpg)
+
+
 # Tecnologías utilizadas
 - Tecnologias
 	- Spring Boot 3
@@ -256,10 +259,74 @@ public record DatosRegistroMedico(
     @Valid DatosDireccion direccion) {}
 ```
 
+## 03 - Spring Security
+### Autenticación y Autorización
+Autenticación se puede resumir como el proceso mediante el cual tú aseguras que eres la persona que dice ser.
+- Un ejemplo claro. Supongamos que yo estoy yendo al aeropuerto y yo deseo viajar a Estados Unidos. Entonces lo primero que yo hago cuando voy al aeropuerto es autenticarme con el counter que está en el aeropuerto. En este caso, ¿cómo me voy a autenticar? Con mi pasaporte. Mi pasaporte es mi credencial que me va a dar acceso a la sala de embarque del aeropuerto.
+-  Tu usuario y tu clave son las credenciales que definen que tú en efecto eres quien dice ser.
 
+- La autenticación es el proceso mediante el cual tú haces un request o post hacia algún API Rest que en este caso va a ser nuestra clínica médica con tu login, con tu user y con tu clave que ya tienes guardada en la base datos.
+  El API va a buscar en la base de datos a ver si tienes tus credenciales guardadas y si es que es así, él te va a generar un JSON web token,
+  Y finalmente una vez que el backend, que API Rest genera tu JSON web token devuelven el JSON web token a la aplicación cliente y de esta forma la aplicación cliente tiene que enviar ese token como llave para el siguiente paso, que es la autorización.
 
+- Un JSON web token es un simple token o un string, es una serie caracteres alfanuméricos que están encriptados con algún algoritmo y que tienen tus datos de autenticación dentro, como por ejemplo de usuario, tu nombre de usuario.
+#### Tipos de Autenticacion
+- Autenticación stateless:
+¿Qué significa stateless? Que no tiene estado, no tiene estado significa que el servidor no conoce qué usuarios están logueados o no, a diferencia del approach que toma, por ejemplo Java Server Faces, que por cada usuario te crea una sesión de usuario. ¿Qué significa?
+Que en el servidor, en un espacio de la memoria está en la sesión de usuario grabada. Es por eso que escalar ese tipo de aplicaciones es tan complicado, porque requieren en realidad que la máquina escale en sí.
+  La autenticacion que estamos viendo en nuestro app es la aplicación stateless, a diferencia de la aplicación stateful que es la que se maneja en ese tipo de frameworks. Stateful significa que maneja un estado.
 
+-  La autenticación stateless, en la cual nuestro servidor, nuestro API no conoce nada de las sesiones ni de los usuarios logueados. Lo único que hace es validar el proceso de autenticación, es decir que si tu clave que has proporcionado 
+aquí es la misma que yo tengo guardada en mi base de datos, entonces voy a generar un token de autenticación un JSON web token.
+   ![Autentication.jpg](src/img-readme/autentication.jpg)
 
+   
+- ¿a qué nos referíamo con usarlo como llave? Antes de aplicar eso, vamos a entrar a lo que es autorización en sí. 
+- ¿Qué es autorización? 
+Autorizaciones del proceso, por ejemplo, si yo hoy entré al aeropuerto a la sala de embarque y puedo entrar al avión, el proceso de autorización va a ser por ejemplo si yo cuento con autorización para entrar a los Estados Unidos.
+Ustedes saben que yo necesito una visa. La visa es la autorización que yo necesito, en este caso sería el token, para poder entrar a los Estados Unidos. Si yo no tengo esa visa y yo no puedo entrar por nada del mundo.
+
+- El authorization, el JSON web token, viene en un header authorization y es enviado en cada request que mi aplicación cliente va a hacer hacia mi backend.
+  Dependiendo de este token si aún está válido, puede o liberar el acceso o me puede restringir el acceso a este recurso.
+
+![Autorizacion.jpg](src/img-readme/autorizacion.jpg)
+
+#### Agregando Spring Security
+- Entrar a Spring Initializr
+```xml
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+```
+- Al agregar la dependencia de Spring Security:
+  - Ejecutamos nuesta app, y en Insonmia procedemos a realizar nuestras peticionones, ejemplo: Get de obtener los medicos y nos genera un error 401 Unauthorized no estamos autorizados para ver el contenido.
+  - Al agregar la dependencia de Spring Security se bloquearon todos nuestros request. Error 401 Unauthorized
+- Revisamos la url http://localhost:8080/medicos de la peticion get en el navegador y nos habre un login el cual para poder ver el contenido de la peticion get necesitamos logearnos, El user por defecto es "user" y la contraseña la genera Spring al ejecutar nuestro proyecto.
+
+## Hash de contraseña
+- Al implementar una funcionalidad de autenticación en una aplicación, independientemente del lenguaje de programación utilizado, deberá tratar con los datos de inicio de sesión y contraseña de los usuarios, y deberán almacenarse en algún lugar, como, por ejemplo, una base de datos.
+- Las contraseñas son información confidencial y no deben almacenarse en texto sin formato, ya que si una persona malintencionada logra acceder a la base de datos, podrá acceder a las contraseñas de todos los usuarios. Para evitar este problema, siempre debe usar algún algoritmo hash en las contraseñas antes de almacenarlas en la base de datos.
+- Hashing no es más que una función matemática que convierte un texto en otro texto totalmente diferente y difícil de deducir. Por ejemplo, el texto “Mi nombre es Rodrigo” se puede convertir en el texto 8132f7cb860e9ce4c1d9062d2a5d1848, utilizando el algoritmo hash MD5.
+- Un detalle importante es que los algoritmos de hash deben ser unidireccionales, es decir, no debe ser posible obtener el texto original a partir de un hash. Así, para saber si un usuario ingresó la contraseña correcta al intentar autenticarse en una aplicación, debemos tomar la contraseña que ingresó y generar su hash, para luego compararla con el hash que está almacenado en la base de datos.
+- Hay varios algoritmos hashing que se pueden usar para transformar las contraseñas de los usuarios, algunos de los cuales son más antiguos y ya no se consideran seguros en la actualidad, como MD5 y SHA1. Los principales algoritmos actualmente recomendados son:
+
+  - Bcrypt
+  - Scrypt
+  - Argon2
+  - PBKDF2
+- En este proyecto utilizaremos el algoritmo BCrypt, que es bastante popular hoy en día. Esta opción también tiene en cuenta que Spring Security ya nos proporciona una clase que lo implementa.
+
+### Repository Service
+- Si queremos traer objetos desde la base de datos, en este caso quiero traer usuarios de la base datos necesito un repositorio.
+
+## Documentación de Spring Data
+- Como aprendimos en videos anteriores, Spring Data usa su propio patrón de nomenclatura de métodos que debemos seguir para que pueda generar consultas SQL correctamente.
+- Hay algunas palabras reservadas que debemos usar en los nombres de los métodos, como findBy y existBy, para indicarle a Spring Data cómo debe ensamblar la consulta que queremos. Esta característica es bastante flexible y puede ser un poco compleja debido a las diversas posibilidades existentes.
+- Para conocer más detalles y comprender mejor cómo ensamblar consultas dinámicas con Spring Data, acceda a su documentación oficial. https://docs.spring.io/spring-data/jpa/docs/current/reference/html/
+
+#### El método securityFilterChain debe ser anotado con @Bean.
+- Sin esta anotación de método, el objeto SecurityFilterChain no estará expuesto como un bean para Spring.
 
 
 
