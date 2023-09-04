@@ -24,6 +24,7 @@ public class MedicoController{
 
    //Buenas practicas para Metodo Post: Return 201 - Created - Registro Creado, Return URL donde encontrar al medico.
     @PostMapping //recibe datos (JSON) desde Insomnia.
+    @Transactional
     public ResponseEntity<DatosRespuestaMedico> registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico, //Para indicar a spring que es un parametro se usa requestBody y @Valid valida que los datos en DatosRegistroMédico todo sea válido, lleguen correctamente
                                                                 UriComponentsBuilder uriComponentsBuilder){ //genera la URL URI a retornar donde esta el registro creado
         Medico medico = medicoRepository.save(new Medico(datosRegistroMedico));

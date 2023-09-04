@@ -58,28 +58,6 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
      */
 
 
-        /*//No funciono
-        security.csrf(csrf->csrf.disable())
-                .sessionManagement((sess-> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)))
-                .authorizeHttpRequests((request -> request.requestMatchers(HttpMethod.POST,"/login")
-                        .permitAll()
-                        .anyRequest().authenticated()))
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
-        return security.build();
-        */
-
-    /*//No funciono
-      return httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement((session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))) // Le indicamos a spring el tipo de sesion, la politica de creacion es STATELESS
-                .authorizeHttpRequests((request -> request.requestMatchers(HttpMethod.POST, "/login") // Cada request que haga match del tipo post y va para el login
-                        .permitAll() // Concede todos los permisos
-                        .anyRequest() // Los request que vayan despues
-                        .authenticated() // Debe ser autenticados
-                )).build(); // Al final construye el objeto
-     */
-
-
     //Objeto de authenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
