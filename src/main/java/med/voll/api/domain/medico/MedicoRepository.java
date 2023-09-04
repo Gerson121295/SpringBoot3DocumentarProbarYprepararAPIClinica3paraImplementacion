@@ -3,7 +3,10 @@ package med.voll.api.domain.medico;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 
 /*
 Medico Repository - Con esta interfaz vamos a ser capaces de hacer todo el proceso de gestión con la BD a nivel del CRUD: crear, guardar objetos, listar, actualizar, etc, pero automáticamente. ¿Por qué?
@@ -18,7 +21,38 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {//Recibe 
 
     //Metodo devuelve un listado de medicos donde su campo Activo sea = a true
     Page<Medico> findByActivoTrue(Pageable paginacion); //Retorna una Pagina de Medico
+
+    //Escribir consultas en la BD
+      //m.especialidad=:especialidad  --> especialidad sea igual a la enviada en el parametro
+        //m.id not in(   --> que el id no se encuentre en la sig. consulta
+        //select c.medico.id from Consulta c where c.fecha=:fecha  --> Todos los medicos que correspondan a esa fecha ya estan asignado, Por eso debemos seleccionar a los que no esten asignagos para solicitar la cita
+
+    @Query("""
+            select m from Medico m
+            where m.activo = 1
+            and
+            m.especialidad=:especialidad
+            and
+            m.id not in(
+                select c.medico.id from Consulta c
+                where
+                c.fecha=:fecha
+            )
+            order by rand()
+            limit 1
+            """)
+    Medico seleccionarMedicoConEspecialidadEnFecha(Especialidad especialidad, LocalDateTime fecha);
+
+    @Query("""
+            select m.activo
+            from Medico m
+            where m.id=:idMedico
+            """)
+    Boolean findActivoById(long idMedico);
+
 }
+
+
 
 /*
 JpaRepository tiene muchos metodos en los cuales seran heredados por la interfaz MedicoRepository y esta interfaz al ser implementada en el controlador
