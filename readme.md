@@ -208,6 +208,113 @@ La clase de servicio la responsabilidad de ella va a ser procesar esa informaci�
 - Cada principio representa una buena práctica de programación que, cuando se aplica en una aplicación, facilita mucho su mantenimiento y extensión. Estos principios fueron creados por Robert Martin, conocido como Uncle Bob, en su artículo Design Principles and Design Patterns.
 
 ## 03 - Documentacion de la API
+### Documentando con SpringDoc
+#### OpenAPI Initiative
+- La documentación es algo muy importante en un proyecto, especialmente si se trata de una API Rest, ya que en este caso podemos tener varios clientes que necesiten comunicarse con ella y necesiten documentación que les enseñe cómo realizar esta comunicación de manera correcta.
+- Durante mucho tiempo no existió un formato estándar para documentar una API Rest, hasta que en 2010 surgió un proyecto conocido como Swagger, cuyo objetivo era ser una especificación open source para el diseño de APIs Rest. Después de un tiempo, se desarrollaron algunas herramientas para ayudar a los desarrolladores a implementar, visualizar y probar sus APIs, como Swagger UI, Swagger Editor y Swagger Codegen, lo que lo convirtió en un proyecto muy popular y utilizado en todo el mundo.
+- En 2015, Swagger fue comprado por la empresa SmartBear Software, que donó la parte de la especificación a la fundación Linux. A su vez, la fundación renombró el proyecto a OpenAPI. Después de esto, se creó la OpenAPI Initiative, una organización centrada en el desarrollo y la evolución de la especificación OpenAPI de manera abierta y transparente.
+- OpenAPI es actualmente la especificación más utilizada y también la principal para documentar una API Rest. La documentación sigue un patrón que puede ser descrito en formato YAML o JSON, lo que facilita la creación de herramientas que puedan leer dichos archivos y automatizar la creación de documentación, así como la generación de código para el consumo de una API.
+
+- OpenAPI: especificamente OpenAPI Spring doc https://springdoc.org/ es una API que se integra en nuestro proyecto y al ejecutarlo permite al usuario o al cliente tener una APP como postman o Insomnia.
+Esta API nos va a permitir crear una documentación interactiva dentro de nuestro proyecto, que va a permitirle al cliente conseguir trabajar con los endpoints y darle una mejor ilustración de los parámetros que se están aplicando.
+- Para agregar la documentacion agregamos la dependencia de springdoc al archivo pom.xml.
+```xml
+<dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.2.0</version>
+</dependency>
+```
+- Luego de agregar la dependencia, This will automatically deploy swagger-ui to a spring-boot application:
+  - Documentation will be available in HTML format, using the official swagger-ui jars
+  - The Swagger UI page will then be available at http://server:port/context-path/swagger-ui.html and the OpenAPI description will be available at the following url for json format: http://server:port/context-path/v3/api-docs
+- Estas urls se configuran en la clase securityConfigurations para permitir el acceso a las paginas.
+ ```java
+    .requestMatchers("/swagger-ui.html", "/v3/api-docs/**","/swagger-ui/**").permitAll()
+```
+- Luego de configurlo: Ir al navegador Chrome a la ruta para ver la documentacion: http://localhost:8080/v3/api-docs  para una mejor visualizacion de la data en objetos JSON se deberá descargar la extension: JSON Formatter. (O buscar como 2 opcion: Json Beautifier).
+- Entonces en ese archivo JSON, vamos a encontrar todos los récords, todas las clases que nosotros estamos enviando dentro de la API de Postman, aquí vemos que nos indica el tipo que tenemos que pasar.
+Y también tenemos los endpoints, tanto para pacientes, médicos, el login del token, consultas, pacientes por ID, médicos por ID, el Hello World, tenemos el servidor donde está corriendo, que es el puerto 8080 o cualquier otro servidor que estemos ejecutando dentro de esa aplicación, informaciones extras de api-doc.
+
+![docJson.jpg](src/img-readme/docJson.jpg)
+
+- Luego vamos a entrar a la interfaz de usuario de Swagger a travez de la siguiente enlace: http://localhost:8080/swagger-ui/index.html  vemos que tenemos una interfaz de usuario realizada en HTML donde vamos a encontrar todos los endpoints para los controladores que nosotros realizamos.
+  ![swaggerDoc.jpg](src/img-readme/swaggerDoc.jpg)
+
+- Para poder interactuar con los endpoints de los controladores generados por swagger debemos logearnos en login y copiar el toke y pasarlo a las demas controladores para consultar o registrar pacientes, medicos o consulta y para eso se debe pasar el token, por lo que debemos configurarlo para que estos metodos permitan recibie el token en swagger 
+por lo que configuramos en nuestra app. en nuestra clase.
+
+#### 13.34. How do I add authorization header in requests?
+
+- You should add the @SecurityRequirement tags to your protected APIs.
+- For example:
+
+```java
+
+@Operation(security = { @SecurityRequirement(name = "bearer-key") })  //Este codigo va en los controladores que lo necesiten, excepto AutenticacionController este no lo necesita ya que se le da acceso desde el control de seguridad.
+
+//And the security definition sample:  //Este Bean va en la clase SpringDocConfigurations
+@Bean
+public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+        .components(new Components()
+        .addSecuritySchemes("bearer-key",
+        new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+        }
+        
+```
+- En la documentación de Spring-doc, llegamos a la parte de beare(buscar en la lupa), encontramos que para agregar una autorización en el encabezado de nuestras peticiones, tenemos que agregar un método del tipo bean, colocar la anotación bean para ejecutar ese método de forma automática dentro del contexto de Spring framework. 
+Así como colocar la anotación de requerimientos de seguridad dentro de todos los controladores que vayan a tener acceso a ese token. Entonces, lo primero sería colocar, copiar ese método. Vamos a ir de vuelta a nuestra API y en el paquete de infra de infraestructura se agrega un nuevo paquete llamado springdoc que va a ser todo lo relacionado a la documentación.
+- Ese paquete springdoc y dentro de el vamos a crear la clase SpringDocConfigurations dentro de esta clase, nosotros vamos a agregar ese bean que estamos copiando.
+
+- Luego de haber configurado
+- Logearse: para recibir el Token para poder tener acceso a los metodos y acceder a los datos.
+- Ir a autenticacion-controller --> En el metodo POST /login clic en try it out: luego escribir el login y la clave.
+![loginSwagger.jpg](src/img-readme/loginSwagger.jpg)
+
+- Copiar el token y Vemos que esta vez nosotros tenemos un campo Available authorizations que nos va a permitir colocar ese token de autorización, entonces acá nos indica que tenemos que colocar el valor.
+- Y una vez que nosotros seleccionamos autorizar, ese valor va a quedar guardado dentro de la interfaz de usuario en cuanto se esté ejecutando la aplicación, y clic en cerrar.
+![opcionAutorizarToken.jpg](src/img-readme/opcionAutorizarToken.jpg)
+![ingresoTokenAutorizar.jpg](src/img-readme/ingresoTokenAutorizar.jpg)
+![ingresoTokenAutorizar2.jpg](src/img-readme/ingresoTokenAutorizar2.jpg)
+
+- Vamos a obtener el listado de pacientes, le damos a seleccionar acá try out. Y vamos a colocar acá ejecutar.
+  ![obtenerPacienteSwagger.jpg](src/img-readme/obtenerPacienteSwagger.jpg)
+
+#### personalizando la documentación
+- Ademas personalizar la documentación generada por SpringDoc para incluir el token de autenticación. Además del token, podemos incluir otras informaciones en la documentación que forman parte de la especificación OpenAPI, como la descripción de la API, información de contacto y su licencia de uso.
+Estas configuraciones se deben hacer en el objeto OpenAPI, que se configuró en la clase SpringDocConfigurations de nuestro proyecto:
+
+```java
+@Bean
+public OpenAPI customOpenAPI() {
+return new OpenAPI()
+.components(new Components()
+.addSecuritySchemes("bearer-key",
+new SecurityScheme()
+.type(SecurityScheme.Type.HTTP)
+.scheme("bearer")
+.bearerFormat("JWT")))
+.info(new Info()
+.title("API Voll.med")
+.description("API Rest de la aplicación Voll.med, que contiene las funcionalidades de CRUD de médicos y pacientes, así como programación y cancelación de consultas.")
+.contact(new Contact()
+.name("Equipo Backend")
+.email("backend@voll.med"))
+.license(new License()
+.name("Apache 2.0")
+.url("http://voll.med/api/licencia")));  }
+```
+- Las ventajas de generar una documentación automatizada de una API Rest.
+  - Facilidad para que los clientes se integren a ella.
+    - La documentación facilita mucho la vida de quienes desean integrarse a una API Rest, ya que expone sus funcionalidades y cómo deben ser consumidas.
+  - Posibilidad de probar la API.
+    - La documentación generada siguiendo el estándar OpenAPI permite que herramientas como Swagger UI se puedan utilizar para probar la API.
+
+## 04-Tests automatizados
+### Testes con Spring Boot
+
+
 
 
 

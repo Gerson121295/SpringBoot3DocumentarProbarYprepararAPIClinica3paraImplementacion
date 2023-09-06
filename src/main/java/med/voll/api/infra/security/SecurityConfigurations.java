@@ -30,8 +30,9 @@ public class SecurityConfigurations {
 
         return httpSecurity.csrf(csrf->csrf.disable())
                 .sessionManagement((sess-> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))) //le indicamos a spring el tipo de sesion
-                .authorizeHttpRequests((request -> request.requestMatchers(HttpMethod.POST,"/login")
-                        .permitAll()
+                .authorizeHttpRequests((request ->
+                        request.requestMatchers(HttpMethod.POST,"/login").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest()
                         .authenticated()))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)//agrega mi filtro antes y en UsernamePasswordAuthenticationFilter valia que el usuario que esta iniciando la sesion existe y ya esta autenticado.
@@ -40,8 +41,26 @@ public class SecurityConfigurations {
     }//decirle Spring, la política de creación es stateless y cada request que haga match que es un request de tipo post y va para login permitirle a todos. Después todos los requests tienen que ser autenticados. Y bueno, construye el objeto finalmente.
 
 
+
    // con el metodo SecurityFilerChain la autenticación ya es stateless, ya no maneja por defecto una autenticación a nivel de Spring Security, que me cierra todo por defecto ybque da una página de login por defecto autogenerada.
  //Sino que ahora yo tengo el control sobre mí autenticación,
+
+    /*//Forma del profesor.
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity.csrf().disable().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Le indicamos a Spring el tipo de sesion
+                .and().authorizeRequests()
+                .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                .requestMatchers("/swagger-ui.html", "/v3/api-docs/**","/swagger-ui/**").permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+     */
+
+
 
     /*
     //Metodo recomendado por el instructor

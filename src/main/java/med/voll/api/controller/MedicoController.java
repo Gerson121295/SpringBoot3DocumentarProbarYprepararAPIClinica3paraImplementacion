@@ -1,5 +1,6 @@
 package med.voll.api.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import med.voll.api.domain.direccion.DatosDireccion;
@@ -16,6 +17,7 @@ import java.net.URI;
 
 @RestController //Para decirle a spring, que esos es un controller
 @RequestMapping("/medicos") //mapear el path médicos en este controller
+@SecurityRequirement(name = "bearer-key") //para la documentacion o probar desde swagger
 public class MedicoController{
 
     @Autowired(required = false) //Para definir la interfaz - No recomendable usar @Autowired ya que tendremos problemas al hacer pruebas unitarias
