@@ -4,6 +4,7 @@ package med.voll.api.infra.errores;
 //EL fin de esta clase es: Tratar los errores globalmente a nivel del controller, de mi proyecto, no a nivel de cada método en específico del controlador.
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -34,6 +35,17 @@ public class TratadorDeErrores {
     public ResponseEntity tratarError400(MethodArgumentNotValidException e){
         var errores = e.getFieldErrors().stream().map(DatosErrorValidacion::new).toList();
         return ResponseEntity.badRequest().body(errores);
+    }
+
+    //Muestra el mensaje: "Este id para paciente no fue encontrado." en Postman o Insomnia al ocurrir un error - Id paciente no encontrado
+    @ExceptionHandler(ValidacionDeIntegridad.class)//Cunado la exeption MethodArgumentNotValidException es lanzada.
+    public ResponseEntity errorHandlerValidacionesDeIntegridad(Exception e){
+       return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler(ValidationException.class)//Cunado la exeption MethodArgumentNotValidException es lanzada.
+    public ResponseEntity errorHandlerValidacionesDeNegocio(Exception e){
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
 

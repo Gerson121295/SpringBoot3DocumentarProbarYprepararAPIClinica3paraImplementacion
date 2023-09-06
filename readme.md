@@ -193,8 +193,21 @@ LocalDateTime data
   - Migration, para hacer las alteraciones en la base de datos.
 - Estos son los cinco tipos de código que siempre desarrollaremos para una nueva funcionalidad. Esto también se aplica al agendamiento de las consultas, incluyendo un sexto elemento a la lista, las reglas de negocio. En esta clase, entenderemos cómo implementar las reglas de negocio con algoritmos más complejos.
 
+- La clase de consultaController, es la clase encargada de comunicarse con las API externas, recibir la información y guardarla en la base de datos.
+- Tenemos algunas reglas que deben cumplirse, entonces nosotros tenemos que validar que ese ID existiera en la BD y tenemos que validar otras reglas de negocio, por lo que se construyo una clase de servicio para evitar colocar todas esas responsabilidades dentro de la clase controlador, ya que es la responsabilidad de la clase controlador únicamente comunicarse con APIs externas.
+La clase de servicio la responsabilidad de ella va a ser procesar esa información para poder posteriormente enviarla al repositorio y guardar esa información en la base de datos.
 
+## 02 - Reglas de Negocio
+###  Principios SOLID
+- SOLID es un acrónimo que representa cinco principios de programación:
+  - Principio de Responsabilidad Única (Single Responsibility Principle)
+  - Principio Abierto-Cerrado (Open-Closed Principle)
+  - Principio de Sustitución de Liskov (Liskov Substitution Principle)
+  - Principio de Segregación de Interfaces (Interface Segregation Principle)
+  - Principio de Inversión de Dependencia (Dependency Inversion Principle)
+- Cada principio representa una buena práctica de programación que, cuando se aplica en una aplicación, facilita mucho su mantenimiento y extensión. Estos principios fueron creados por Robert Martin, conocido como Uncle Bob, en su artículo Design Principles and Design Patterns.
 
+## 03 - Documentacion de la API
 
 
 
