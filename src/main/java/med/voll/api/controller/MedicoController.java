@@ -1,5 +1,6 @@
 package med.voll.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class MedicoController{
    //Buenas practicas para Metodo Post: Return 201 - Created - Registro Creado, Return URL donde encontrar al medico.
     @PostMapping //recibe datos (JSON) desde Insomnia.
     @Transactional
+    @Operation(summary = "Registra un nuevo medico en la base de datos")
     public ResponseEntity<DatosRespuestaMedico> registrarMedico(@RequestBody @Valid DatosRegistroMedico datosRegistroMedico, //Para indicar a spring que es un parametro se usa requestBody y @Valid valida que los datos en DatosRegistroMédico todo sea válido, lleguen correctamente
                                                                 UriComponentsBuilder uriComponentsBuilder){ //genera la URL URI a retornar donde esta el registro creado
         Medico medico = medicoRepository.save(new Medico(datosRegistroMedico));
@@ -94,6 +96,7 @@ public class MedicoController{
     //Cantidad de registros y la pagina: http://localhost:8080/medicos?size=2&page=2
    // Paginacion y orden por nombre: http://localhost:8080/medicos?size=4&page=0&sort=nombre    //El atributo a ordenar "nombre" debe ser igual al definido en la tabla de la BD.
     @GetMapping
+    @Operation(summary = "Obtiene el listado de medicos")
     //Para mostrar los datos requeridos se usa un DTO llamado DatosListadoMedico en el cual se define los parametros a mostrar.
     //public Page<DatosListadoMedico> listadoMedico(Pageable paginacion){ //Antes era una lista y ahora debe ser una página elegimos "Page" Page Spring, El parametro Pageable viene del frontend para la paginacion
     public ResponseEntity<Page<DatosListadoMedico>> listadoMedico(@PageableDefault(size = 5) Pageable paginacion){ //Para establecer valores por default a mostrar al ejecutarse la app se utiliza @PageableDefault(size = 2) //muestra 2 registros por default al iniciar la app.
@@ -110,6 +113,7 @@ public class MedicoController{
 */
     @PutMapping //Como buena practica se retorna el objeto que se actualizo
     @Transactional //Cuando termine el metodo la transaccion se va a liberar por lo que se actualizará el registro
+    @Operation(summary = "Actualiza los datos de un medico existente")
     public ResponseEntity actualizarMedico(@RequestBody @Valid DatosActualizarMedico datosActualizarMedico){ //Para actualizar se creo un nuevo DTO DatosActualizarMedico ya que tiene informacion especifica para actualizacion Nombre, Documento y Direccion.
         Medico medico = medicoRepository.getReferenceById(datosActualizarMedico.id()); //Instanciamos la entidad Medico
         medico.actualizarDatos(datosActualizarMedico);
@@ -156,6 +160,7 @@ public class MedicoController{
     //Probar metodo Delete: DEL ->  http://localhost:8080/medicos/7
     @DeleteMapping("/{id}")// /3  o  /{id} - va una variable id la cual se recibe para eliminar el medico
     @Transactional
+    @Operation(summary = "Elimina un medico registrado - inactivo")
     public ResponseEntity eliminarMedico(@PathVariable Long id){ //@PathVariable especifica que la variable viene del Path es tipo Long id
         Medico medico = medicoRepository.getReferenceById(id);
         medico.desactivarMedico();
@@ -166,6 +171,7 @@ public class MedicoController{
     //Probar metodo GET ->  http://localhost:8080/medicos/7
     @GetMapping("/{id}")// /3  o  /{id} - variable id la cual se recibe al crear el registro medico
     @Transactional
+    @Operation(summary = "Obtiene los registros del medico con ID")
     public ResponseEntity<DatosRespuestaMedico> retornaDatosMedico(@PathVariable Long id){ //@PathVariable especifica que la variable viene del Path es tipo Long id
         Medico medico = medicoRepository.getReferenceById(id);
         var datosMedico= new DatosRespuestaMedico(

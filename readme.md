@@ -314,6 +314,25 @@ new SecurityScheme()
 ## 04-Tests automatizados
 ### Testes con Spring Boot
 
+#### ¿Que vamos a Testear?
+- Controller --> API
+- Service    --> Regla de Negocio
+- Repository --> Queries
+
+#### Tipos de Test
+##### Test de caja negra: 
+- Testeado usando Postman, Insomnia o swagger con spring doc.
+- Las pruebas de caja negra nosotros vamos a imaginar que tenemos una caja negra donde simplemente realizamos una acción y nosotros vamos a recibir una acción de retorno. No vamos a tener acceso a las configuraciones internas de esa caja.
+
+##### Test de caja blanca: 
+- Testes automatizados, que son pruebas donde nosotros tenemos acceso a la configuración interna.
+- En las pruebas de caja blanca, si tenemos un acceso, tenemos más control sobre qué está haciendo realizado. Entonces, dentro de la estructura de nuestro proyecto, nosotros tenemos los controladores.
+la parte de los servicios que fueron todas las validaciones y los repositorios. Dentro de los repositorios hay un conjunto de elementos que ya han sido aprobados por el Spring framework, como es el método findByActivoTrue, findById, findAll.
+- Entonces, todos esos métodos ya han sido probados, nosotros nos vamos a enfocar en cómo probar estas consultas que nosotros agregamos dentro del repositorio, que fueron consultas manuales y vamos a probar esta consulta simulando un conjunto de datos y configurando un banco de datos de prueba.
+- Otro candidato a las pruebas, a realizar testes automatizados, serían las validaciones, ya que en las validaciones nosotros podemos verificar las reglas de negocio, verificar que se estén cumpliendo, el tiempo en el que se están realizando y que los datos que estamos enviando y recibiendo sean correctos.
+
+
+
 
 
 

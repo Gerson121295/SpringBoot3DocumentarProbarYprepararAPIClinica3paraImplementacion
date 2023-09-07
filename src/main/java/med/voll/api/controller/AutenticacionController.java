@@ -1,5 +1,6 @@
 package med.voll.api.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import med.voll.api.domain.usuarios.DatoAutenticarUsuario;
 import med.voll.api.domain.usuarios.Usuario;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/login")
+@Tag(name = "Autenticacion", description = "Obtiene el token para el usuario asignado que da acceso al resto de endpoint") //Para la documentacion en swagger
 public class AutenticacionController {
-
 
     @Autowired
     private AuthenticationManager authenticationManager; //Inyeccion //el autenticationManager disparar el proceso de autenticación en Spring
