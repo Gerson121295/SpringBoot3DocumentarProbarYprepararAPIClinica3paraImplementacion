@@ -422,24 +422,194 @@ class MedicoRepositoryTest {
 - Vamos a realizar el empaquetamiento de nuestra aplicación, vamos a trabajar con los perfiles, en los ambientes donde vamos a trabajar, nosotros ya mostramos que estábamos trabajando con el ambiente de prueba únicamente para las pruebas donde teníamos una base de datos aparte de la base de datos que estábamos utilizando para el desarrollo de la aplicación.
 - Entonces nosotros vamos a tener un tercer perfil que es el perfil de producción. Ese perfil es el perfil donde nosotros vamos a colocar las configuraciones que van a ir al servidor final. Entonces, para eso nosotros vamos a copiar este archivo que es el archivo de aplicaciones. Lo vamos a pegar dentro de la carpeta de recursos.
 - A este archivo le vamos a colocar application-prod.properties, indicando que va a hacer el perfil de producción. Realizamos las siguientes configuraciones en el perfil de produccion:
-
-  - Colocar false las siguientes anotaciones
-    spring.jpa.show-sql=false  #para ver en consola las queries que Spring JPA está ejecutado sobre la App y la base de datos.
-    spring.jpa.properties.hibernate.format_sql=false  #Para formatear las queries que tenemos. No es recomendable tenerlo en produccion, se ve contaminado los logs
-
 - Usar variables de ambiente para evitar exponer la ruta, así como el usuario y la contraseña, dentro de nuestra aplicación. Para eso vamos a utilizar el siguiente comando. ${DATASOURCE_URL} De la misma forma lo vamos a hacer para el usuario. DATASOURCE_USERNAME. 
 Y colocar $DATASOURE_PASSWORD. Entonces, de esta forma estamos indicando a Spring framework, que este va a ser el formato con el que vamos a pasar la URL, entonces así protegemos la aplicación de dejar las contraseñas de usuarios y la ruta de la base de datos expuestos.
 - Adicionalmente, se coloca acá el perfil, el perfil que se encuentra activo. Entonces, ya que este es el perfil de producción, vamos a colocar profile.active: prod. Entonces, ya con eso, nosotros estamos indicando acá que estamos activando el perfil de producción para esta configuración.
-- Y dentro de la aplicación convencional, vamos a activar los perfiles profiles.active. Acá vamos a activar todos los perfiles, que sería el perfil de desarrollo, el perfil de test y el perfil de producción.
+- Y dentro application.properties de la aplicación convencional, vamos a activar los perfiles profiles.active. Acá vamos a activar todos los perfiles, que sería el perfil de desarrollo, el perfil de test y el perfil de producción.
 
+#### Configuracion del perfil de produccion prod application-prod.properties
 ```properties
-  spring.jpa.properties.hibernate.format_sql=false 
-  spring.jpa.show-sql=false
+spring.profile.active=prod
+spring.datasource.url=${DATASOURCE_URL}
+spring.datasource.username=${DATASOURCE_USERNAME}
+spring.datasource.password=${DATASOURCE_PASSWORD}
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
+server.error.include-stacktrace=never
+api.security.secret=${JWT_SECRET:123456}
 ```
 
+#### Configuracion del perfil convencional: application.properties
+```properties
+spring.profiles.active=dev, test, prod
+spring.datasource.url=jdbc:mysql://localhost/vollmed_api
+spring.datasource.username=root
+spring.datasource.password=admin
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+server.error.include-stacktrace=never
+api.security.token.secret=${JWT_SECRET:123456}
+```
 
+#### Configuracion del perfil test: application-test.properties
+```properties
+## Database:
+## url+direccion(localhost)+puerto(3306)+vollmed_api(nombre de la BD)
+spring.datasource.url=jdbc:mysql://localhost/vollmed_api_test?createDatabaseIfNotExist=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=admin
+```
+- Para que el Build.maven sea exitosa debemos tener bien estructurados los application.properties sin tantos comentarios ni espacios.
 
+-  Una vez toda la configuración realizada, realizar lo siguiente:
+  - Ir a la pestaña de Maven y en la parte de API vamos a ir a donde dice Lifecycle(ciclo de vida) y en package clic derecho y vamos a correr, Run Maven build.
+  - Sí se ejecutó correctamente, vemos que el realizó el compilado de forma exitosa, ejecutó las cuatro pruebas y realizó en el lado izquierdo, en el panel izquierdo.
+    ![buildMaven1.jpg](src/img-readme/buildMaven1.jpg)
+    ![buildMaven2.jpg](src/img-readme/buildMaven2.jpg)
 
+  - Nosotros vamos a encontrar ahora una carpeta llamada target con todas las clases que fueron generadas y un archivo ejecutable "api-0.0.1-SNAPSHOT.jar" que es el que nosotros vamos a tomar y vamos a descargar dentro de alguno de los servicios Cloud, como Amazon, Azure o Google Cloud.
+    - Solo se necesitas agregar el archivo JAR principal, que es "api-0.0.1-SNAPSHOT.jar", al servidor para realizar el despliegue.
+  ![buildSuccessMaven.jpg](src/img-readme/buildSuccessMaven.jpg)
+
+- En la siguiente parte vamos a ver cómo se realizan estas actividades dentro de la consola.
+
+### Ejecutando via Terminal
+- Luego de haber compilado la aplicación, ahora vamos a intentar simular el deploy en un servicio de nube o en un servidor local. Entonces lo primero que tenemos que hacer es revisar dónde se encuentra ese archivo dentro de la consola. Para eso vamos a utilizar el comando ls target.
+- Dentro de Intellij teniendo abierto el proyecto, abrimos la consola de intellij y escribimos el comando: ls target
+- Al ejecutar ls target obtenemos el archivo "api-0.0.1-SNAPSHOT.jar" que debemos compilara para desplegar en el servidor.
+- Pero antes de compilar debemos ver la version de java con la que se esta trabajando, ejecutamos: java -version //tenemos la version 17 si queremos cambiarla vamos a la pestaña de File --> Project Structure --> project --> y cambiar la version.
+``` java
+java -version
+```
+- compilamos ese archivo "api-0.0.1-SNAPSHOT.jar" con el comando java –jar, pasando la ruta donde se encuentra y el nombre del archivo a desplegar.
+``` java
+java -jar target/api-0.0.1-SNAPSHOT.jar
+``` 
+- Compilando estableciendo el perfil de Produccion enviandole los datos de la BD, por lo que es acá luego de la palabra java, se coloca todos los valores para esas variables de ambiente. 
+En los servicios de cloud, podemos encontrar en alguna parte como Google o en Amazon, alguna parte donde se puede configurar esas variables de ambiente o si se encuentra en un escritorio como Windows pueden configurar las variables de ambiente en la parte de propiedades del sistema.:  
+
+``` java
+java -DDATASOURCE_URL=jdbc:mysql://localhost/vollmed_api -DDATASOURCE_USERNAME=root -DDATASOURCE_PASSWORD=admin -jar target/api-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+![deployLocalSuccess.jpg](src/img-readme/deployLocalSuccess.jpg)
+![deployLocalSuccess2.jpg](src/img-readme/deployLocalSuccess2.jpg)
+
+- Él buscó el perfil de producción, y no ha encontró ningún error. Entonces, las variables de ambiente fueron configuradas, él ejecutó la aplicación y ya encontramos la aplicación corriendo dentro de nuestro ambiente del escritorio con las variables previamente pasadas dentro de la consola.
+- Este es el mismo proceso en un sistema de cloud y de esta forma, tenemos nuestra aplicación desarrollada y aplicada dentro del servidor exitosamente.
+
+### Build con archivo .war
+- Proyectos que utilizan Spring Boot generalmente usan el formato jar para empaquetar la aplicación, como se demostró durante esta lección. Sin embargo, Spring Boot brinda soporte para empaquetar la aplicación en formato war, que era ampliamente utilizado en aplicaciones Java antiguas.
+- Si desea que el build del proyecto empaquete la aplicación en un archivo en formato war, deberá realizar los siguientes cambios:
+
+1) Agregue la etiqueta <packaging>war</packaging> al archivo pom.xml del proyecto, y esta etiqueta debe ser hija de la etiqueta raíz <project>:
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+<parent>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-parent</artifactId>
+<version>3.0.0</version>
+<relativePath/> <!-- lookup parent from repository -->
+</parent>
+<groupId>med.voll</groupId>
+<artifactId>api</artifactId>
+<version>0.0.1-SNAPSHOT</version>
+<name>api</name>
+<packaging>war</packaging>
+```
+2) En el archivo pom.xml, agregue la siguiente dependencia:
+
+```dependency
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-tomcat</artifactId>
+  <scope>provided</scope>
+</dependency>
+```
+3) Cambie la clase principal del proyecto (ApiApplication) para heredar de la clase SpringBootServletInitializer, y sobrescriba el método configure:
+
+```java
+@SpringBootApplication
+public class ApiApplication extends SpringBootServletInitializer {
+@Override
+protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+return application.sources(ApiApplication.class);
+}
+public static void main(String[] args) {
+SpringApplication.run(ApiApplication.class, args);
+}
+}
+```
+- ¡Listo! Ahora, al realizar el build del proyecto, se generará un archivo con la extensión .war en el directorio target, en lugar del archivo con la extensión .jar.
+
+### GraalVM Native Image
+- Una de las características más destacadas de la versión 3 de Spring Boot es el soporte para imágenes nativas, algo que reduce significativamente el consumo de memoria y el tiempo de inicio de una aplicación. Algunos otros frameworks competidores de Spring Boot, como Micronaut y Quarkus, ya ofrecían soporte para esta función.
+- De hecho, era posible generar imágenes nativas en aplicaciones con Spring Boot antes de la versión 3, pero esto requería el uso de un proyecto llamado Spring Native que agregaba soporte para ello. Con la llegada de la versión 3 de Spring Boot, ya no es necesario utilizar este proyecto.
+
+#### Native Image
+- Una imagen nativa es una tecnología utilizada para compilar una aplicación Java, incluyendo todas sus dependencias, generando un archivo binario ejecutable que puede ser ejecutado directamente en el sistema operativo sin necesidad de utilizar la JVM. Aunque no se ejecute en una JVM, la aplicación también contará con sus recursos, como la gestión de memoria, el recolector de basura y el control de la ejecución de hilos.
+- Para obtener más detalles sobre la tecnología de imágenes nativas, consulte la documentación en el sitio web:<a>https://www.graalvm.org/native-image </a>
+#### Native Imagem com Spring Boot 3
+- Una forma muy sencilla de generar una imagen nativa de la aplicación es mediante un plugin de Maven, que debe incluirse en el archivo pom.xml:
+``` dependency
+<plugin>
+  <groupId>org.graalvm.buildtools</groupId>
+  <artifactId>native-maven-plugin</artifactId>
+</plugin>
+```
+- Listo! Esta es la única modificación necesaria en el proyecto. Después de esto, la generación de la imagen debe hacerse a través de la terminal, con el siguiente comando de Maven que se ejecuta en el directorio raíz del proyecto: ./mvnw -Pnative native:compile
+- Este comando puede tardar varios minutos en completarse, lo cual es completamente normal.
+- ¡Atención! Para ejecutar el comando anterior y generar la imagen nativa del proyecto, es necesario que tenga instalado en su computadora GraalVM <a>https://www.graalvm.org/22.0/docs/getting-started/ </a> (una máquina virtual Java con soporte para la función Native Image) en una versión igual o superior a 22.3.
+Después de que el comando anterior termine, se generará en la terminal un registro como el siguiente:
+```
+Top 10 packages in code area:           Top 10 object types in image heap:
+   3,32MB jdk.proxy4                      19,44MB byte[] for embedded resources
+   1,70MB sun.security.ssl                16,01MB byte[] for code metadata
+   1,18MB java.util                        8,91MB java.lang.Class
+ 936,28KB java.lang.invoke                 6,74MB java.lang.String
+ 794,65KB com.mysql.cj.jdbc                6,51MB byte[] for java.lang.String
+ 724,02KB com.sun.crypto.provider          4,89MB byte[] for general heap data
+ 650,46KB org.hibernate.dialect            3,07MB c.o.s.c.h.DynamicHubCompanion
+ 566,00KB org.hibernate.dialect.function   2,40MB byte[] for reflection metadata
+ 563,59KB com.oracle.svm.core.code         1,30MB java.lang.String[]
+ 544,48KB org.apache.catalina.core         1,25MB c.o.s.c.h.DynamicHu~onMetadata
+  61,46MB for 1482 more packages           9,74MB for 6281 more object types
+--------------------------------------------------------------------------------
+    9,7s (5,7% of total time) in 77 GCs | Peak RSS: 8,03GB | CPU load: 7,27
+--------------------------------------------------------------------------------
+Produced artifacts:
+ /home/rodrigo/Desktop/api/target/api (executable)
+ /home/rodrigo/Desktop/api/target/api.build_artifacts.txt (txt)
+================================================================================
+Finished generating 'api' in 2m 50s.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:03 min
+[INFO] Finished at: 2023-01-17T12:13:04-03:00
+[INFO] ------------------------------------------------------------------------
+```
+- La imagen nativa se genera en el directorio target, junto con el archivo .jar de la aplicación, como un archivo ejecutable de nombre api-0.0.1-SNAPSHOT.jar
+- texto alternativo: Lista de archivos y directorios ubicados dentro del directorio target del proyecto, incluido el archivo de la imagen nativa, cuyo nombre es api.
+
+- La diferencia del archivo .jar, que se ejecuta en la JVM mediante el comando java -jar, la imagen nativa es un archivo binario y debe ejecutarse directamente desde la terminal:
+```
+target/api
+```
+- Al ejecutar el comando anterior se generará el registro de inicio de la aplicación, que al final muestra el tiempo que tardó la aplicación en iniciarse:
+```
+INFO 127815 --- [restartedMain] med.voll.api.ApiApplication : Started ApiApplication in 0.3 seconds (process running for 0.304)
+```
+- Observe que la aplicación tardó menos de medio segundo en iniciarse, algo realmente impresionante, ya que cuando se ejecuta en la JVM, a través del archivo .jar, este tiempo aumenta a alrededor de 5 segundos.
+- Para obtener más detalles sobre la generación de una imagen nativa con Spring Boot 3, consulte la documentación en el sitio: Soporte de imagen nativa GraalVM <a> https://www.graalvm.org/22.0/reference-manual/native-image/ </a>.
+
+#### Ventajas de utilizar variables de entorno en las configuraciones de una aplicación.
+- Flexibilizar las configuraciones de la aplicación.
+  - Con variables de entorno, es posible modificar configuraciones en la aplicación sin tener que realizar cambios en el código.
+- Evitar vulnerabilidades en la aplicación.
+  - Con variables de entorno, evitamos exponer información sensible en el código de la aplicación, como el inicio de sesión y la contraseña de la base de datos.
 
 
 - Codigo del Proyecto Actual:
@@ -447,9 +617,6 @@ Y colocar $DATASOURE_PASSWORD. Entonces, de esta forma estamos indicando a Sprin
 - Enlaces donde podemos encontrar el soporte visual de la aplicación mobile front end y las diferentes actividades que fueron realizadas:
   - Aplicación mobile Front End:https://www.figma.com/file/vgn35i1ErivIN8LJYEqxGZ/Untitled?type=design&node-id=0-1&mode=design&t=0KPDVGatVlzK13xz-0
   - Solicitud del cliente para la API: https://trello.com/b/yGQuuyVV/api-voll-med
-  
-    
-    
 
 # Estado del proyecto
 <p>

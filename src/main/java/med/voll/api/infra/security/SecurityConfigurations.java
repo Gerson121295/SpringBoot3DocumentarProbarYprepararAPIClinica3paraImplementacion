@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration//Anotacion para indicarle a Spring que escane esta clase como una configuracion.
 @EnableWebSecurity //Anotacion indica a spring que habilite el modo web security para esta clase de configuracion.
 public class SecurityConfigurations {
@@ -32,11 +34,24 @@ public class SecurityConfigurations {
                 .sessionManagement((sess-> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))) //le indicamos a spring el tipo de sesion
                 .authorizeHttpRequests((request ->
                         request.requestMatchers(HttpMethod.POST,"/login").permitAll()
+                                .requestMatchers("/swagger-ui.html", "/v3/api-docs/**","/swagger-ui/**").permitAll()
+                                .anyRequest()
+                                .authenticated()))
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)//agrega mi filtro antes y en UsernamePasswordAuthenticationFilter valia que el usuario que esta iniciando la sesion existe y ya esta autenticado.
+                .build();
+
+        /*
+        return httpSecurity.csrf(csrf->csrf.disable())
+                .sessionManagement((sess-> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))) //le indicamos a spring el tipo de sesion
+                .authorizeHttpRequests((request ->
+                        request.requestMatchers(HttpMethod.POST,"/login").permitAll()
                         .requestMatchers("/swagger-ui.html", "/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest()
                         .authenticated()))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)//agrega mi filtro antes y en UsernamePasswordAuthenticationFilter valia que el usuario que esta iniciando la sesion existe y ya esta autenticado.
          .build();
+        */
+
 
     }//decirle Spring, la política de creación es stateless y cada request que haga match que es un request de tipo post y va para login permitirle a todos. Después todos los requests tienen que ser autenticados. Y bueno, construye el objeto finalmente.
 
