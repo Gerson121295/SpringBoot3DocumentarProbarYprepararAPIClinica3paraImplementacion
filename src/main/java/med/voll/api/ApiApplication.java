@@ -11,6 +11,3 @@ public class ApiApplication {
 	}
 
 }
-
-//https://github.com/alura-es-cursos/Spring-Boot-3/blob/stage-5/src/main/java/med/voll/api/ApiApplication.java
-
