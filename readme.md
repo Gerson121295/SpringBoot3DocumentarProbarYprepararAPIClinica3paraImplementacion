@@ -331,20 +331,111 @@ la parte de los servicios que fueron todas las validaciones y los repositorios. 
 - Entonces, todos esos métodos ya han sido probados, nosotros nos vamos a enfocar en cómo probar estas consultas que nosotros agregamos dentro del repositorio, que fueron consultas manuales y vamos a probar esta consulta simulando un conjunto de datos y configurando un banco de datos de prueba.
 - Otro candidato a las pruebas, a realizar testes automatizados, serían las validaciones, ya que en las validaciones nosotros podemos verificar las reglas de negocio, verificar que se estén cumpliendo, el tiempo en el que se están realizando y que los datos que estamos enviando y recibiendo sean correctos.
 
+### Empezar a hacer tests:
+- Ir al MedicoRepository -->  
+  - Page<Medico> findByActivoTrue(Pageable paginacion);  //Este tipo metodo no necesita hacerle test automatico ya que spring framework lo valida automaticamente.
+  - Crear un test automatico para el siguiente metodo de MedicoRepository: Medico seleccionarMedicoConEspecialidadEnFecha(Especialidad especialidad, LocalDateTime fecha);
+    - Seleccionar el metodo: "seleccionarMedicoConEspecialidadEnFecha" luego clic derecho --> Generate --> Test --> Elegir la libreria a usar en este caso es JUnit5 y seleccionar el metodo a testar luego clic en OK.
+      ![testSeleccionaMedico.jpg](src/img-readme/testSeleccionaMedico.jpg)
+    - Automaticamente genera una clase llamada MedicoRepositoryTest en la carpeta test dentro de domain.medico
+    - Dentro de la carpeta test por defecto se encuetra la clase ApiApplicationTests para test como no se va a utilizar se elimina.
+    - la anotacion @DataJpaTest sobre la clase MedicoRepositoryTest permite utilizar algunos métodos, relacionadas a la capa de persistencia. Por lo que se debe configurar una BD. puede ser local usando H2 o una remoto MySQL
+
+- Cuando se hacen Test se debe separar la BD de produccion y la BD de Debug o de pruebas.
+
+##### Realizando Test - Trabajando con una BD Externa MySQL
+- Configurar la BD de Pruebas creando un archivo application-test.properties donde guarde la data de conexion a la BD:
+```properties
+#Para utilizar BD exterma MySQL
+#url+direccion(localhost)+puerto(3306)+vollmed_api(nombre de la BD)
+spring.datasource.url=jdbc:mysql://localhost/vollmed_api_test?createDatabaseIfNotExist=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=admin
+```
+- Anotaciones a agregar en la clase a testear: MedicoRepositoryTest
+```java
+@DataJpaTest //permitir utilizar métodos, relacionadas a la capa de persistencia. Por lo que se debe configurar una BD. puede ser local o usando H2 o una remoto MySQL
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) //para indicar que se va a utilizar una BD externa y que no se va a reemplazar la base de datos que se esta utilizando previamente. Indica que no se va a utilizar la BD en memoria h2, que va a instalar, sino una BD externa.
+@ActiveProfiles("test") //Indica el perfil de BD a utilizar
+class MedicoRepositoryTest {
+    @Test
+    void seleccionarMedicoConEspecialidadEnFecha() {
+    }
+}
+```
+- Correr la Clase MedicoRepositoryTest debe dar ok.
+
+##### Realizando Test - Trabajando con una BD Local H2 "en memria"
+- Es posible realizar pruebas de interfaces de repositorio utilizando una base de datos en memoria, como H2, en lugar de utilizar la misma base de datos de la aplicación.
+- Se debe agregar la dependencia de H2
+```xml
+        <dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+```
+- Configurar la BD de Pruebas creando un archivo application-test.properties donde guarde la data de conexion a la BD:
+```properties
+#Para utilizar BD H2 Local
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+```
+- Anotaciones a agregar en la clase a testear: MedicoRepositoryTest
+```java
+@DataJpaTest //permitir utilizar métodos, relacionadas a la capa de persistencia. Por lo que se debe configurar una BD. puede ser local o usando H2 o una remoto MySQL
+@ActiveProfiles("test") //Indica el perfil de BD a utilizar
+class MedicoRepositoryTest {
+    @Test
+    void seleccionarMedicoConEspecialidadEnFecha() {
+    }
+}
+```
+- Correr la Clase MedicoRepositoryTest debe dar ok.
+- Si da error, Probar:
+  - Se debe eliminar las anotaciones @AutoConfigureTestDatabase y @ActiveProfiles en la clase de prueba, dejándola solo con la anotación @DataJpaTest:
+  - También puede eliminar el archivo application-test.properties, ya que Spring Boot realiza la configuración de la URL, el nombre de usuario y la contraseña de la base de datos H2 de manera automática.
+  
+### Testando el repository - MedicoRepository
+- Ver en la carpeta test la clase MedicoRepositoryTest los 2 escenarios de pruebas realizados.
+### Testando los controladores 
+#### Test a ConsultaController - Testando Error 400
+- Entrar a la clase ConsultaController
+- Clic derecho dentro de la clase y clicar Generate --> Tests -> Y seleccionar la libreria a usar JUnit5 y el metodo agendar para el test --> automaticamente genera la clase ConsultaControllerTest para las pruebas.
 
 
+### Codigo Testables
+- Afirmaciones verdaderas en relación con las pruebas automatizadas.
+  - Podemos combinar pruebas unitarias con pruebas de integración. 
+    - Para algunos componentes, como las clases controller, podemos escribir pruebas unitarias; mientras que para otros, como las interfaces repository, se recomiendan pruebas de integración.
+  - Algunos componentes de Spring no necesitan ser probados. 
+    - Algunos componentes, como las interfaces repository que no tienen métodos de consulta, no necesitan pruebas automatizadas.
+  
+## 05-Build del proyecto
+### Build con Maven
+- Una vez que nosotros desarrollamos la aplicación en su totalidad, realizamos todas las pruebas, todas las verificaciones y la ejecutamos, nosotros vamos a querer realizar un deploy o en algún servidor o en alguna nube.
+- para eso, nosotros tenemos que entregar un archivo ejecutable, y eso lo vamos a hacer a través Maven. Entonces Maven, además de ayudarnos con la descarga de las dependencias para nuestra aplicación, él nos ayuda a realizar el empaquetamiento de todo lo que hemos desarrollado a lo largo del curso para hacer el deploy posteriormente dentro de un servidor.
+- Tenemos que tener un archivo con las clases compiladas, que es el que vamos a colocar dentro del servidor, y de esa forma va a ejecutar la aplicación para que esté disponible para otros usuarios.
+- Vamos a realizar el empaquetamiento de nuestra aplicación, vamos a trabajar con los perfiles, en los ambientes donde vamos a trabajar, nosotros ya mostramos que estábamos trabajando con el ambiente de prueba únicamente para las pruebas donde teníamos una base de datos aparte de la base de datos que estábamos utilizando para el desarrollo de la aplicación.
+- Entonces nosotros vamos a tener un tercer perfil que es el perfil de producción. Ese perfil es el perfil donde nosotros vamos a colocar las configuraciones que van a ir al servidor final. Entonces, para eso nosotros vamos a copiar este archivo que es el archivo de aplicaciones. Lo vamos a pegar dentro de la carpeta de recursos.
+- A este archivo le vamos a colocar application-prod.properties, indicando que va a hacer el perfil de producción. Realizamos las siguientes configuraciones en el perfil de produccion:
 
+  - Colocar false las siguientes anotaciones
+    spring.jpa.show-sql=false  #para ver en consola las queries que Spring JPA está ejecutado sobre la App y la base de datos.
+    spring.jpa.properties.hibernate.format_sql=false  #Para formatear las queries que tenemos. No es recomendable tenerlo en produccion, se ve contaminado los logs
 
+- Usar variables de ambiente para evitar exponer la ruta, así como el usuario y la contraseña, dentro de nuestra aplicación. Para eso vamos a utilizar el siguiente comando. ${DATASOURCE_URL} De la misma forma lo vamos a hacer para el usuario. DATASOURCE_USERNAME. 
+Y colocar $DATASOURE_PASSWORD. Entonces, de esta forma estamos indicando a Spring framework, que este va a ser el formato con el que vamos a pasar la URL, entonces así protegemos la aplicación de dejar las contraseñas de usuarios y la ruta de la base de datos expuestos.
+- Adicionalmente, se coloca acá el perfil, el perfil que se encuentra activo. Entonces, ya que este es el perfil de producción, vamos a colocar profile.active: prod. Entonces, ya con eso, nosotros estamos indicando acá que estamos activando el perfil de producción para esta configuración.
+- Y dentro de la aplicación convencional, vamos a activar los perfiles profiles.active. Acá vamos a activar todos los perfiles, que sería el perfil de desarrollo, el perfil de test y el perfil de producción.
 
-
-
-
-
-
-
-
-
-
+```properties
+  spring.jpa.properties.hibernate.format_sql=false 
+  spring.jpa.show-sql=false
+```
 
 
 

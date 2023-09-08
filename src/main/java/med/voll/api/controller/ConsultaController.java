@@ -41,7 +41,7 @@ public class ConsultaController {
     @Transactional
     @Operation(
             summary = "Cancela una consulta en la base de datos",
-            description = "",
+            description = "requiere motivo",
             tags = { "consulta", "delete" })
     public ResponseEntity cancelar(@RequestBody @Valid DatosCancelamientoConsulta datos){
         service.cancelar(datos);

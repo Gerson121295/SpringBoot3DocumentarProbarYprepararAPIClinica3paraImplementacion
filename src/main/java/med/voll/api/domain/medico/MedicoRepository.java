@@ -20,7 +20,7 @@ Segundo, necesito el tipo de objeto del id. Entonces en este caso sería un Long
 public interface MedicoRepository extends JpaRepository<Medico, Long> {//Recibe la entidad a guardar y su tipo de Id de esa entidad (clase)
 
     //Metodo devuelve un listado de medicos donde su campo Activo sea = a true
-    Page<Medico> findByActivoTrue(Pageable paginacion); //Retorna una Pagina de Medico
+    Page<Medico> findByActivoTrue(Pageable paginacion); //Retorna una Pagina de Medico ////Este tipo metodo no necesita hacerle test automatico ya que spring framework lo valida automaticamente.
 
     //Escribir consultas en la BD
       //m.especialidad=:especialidad  --> especialidad sea igual a la enviada en el parametro
@@ -43,6 +43,7 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {//Recibe 
             """)
     Medico seleccionarMedicoConEspecialidadEnFecha(Especialidad especialidad, LocalDateTime fecha);
     //codigo original =   where m.activo = 1
+//La consulta seleccionarMedicoConEspecialidadEnFecha se encarga de verificar si en la BD ese médico con esa especialidad y esa fecha se encuentra disponible. En caso que no se encuentre disponible retorna nulo y en caso de que se encuentre disponible, va a retornar el médico.
 
 
     @Query("""
